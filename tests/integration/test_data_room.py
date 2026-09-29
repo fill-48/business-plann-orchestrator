@@ -2724,6 +2724,10 @@ class FindingProbe:
     def state(self):
         if any(not ok for _, ok, _ in self.controls):
             return "NON-DISCRIMINANTE"
+        if self.controls and not self.attacks and self.declared:
+            # Tutti gli attacchi sono specifici di un'altra piattaforma (es.
+            # alias NTFS fuori da Windows): esito DICHIARATO, non un RED.
+            return "NON-APPLICABILE"
         if not self.controls or not self.attacks:
             return "VACUO"
         if any(not ok for _, ok, _ in self.attacks):
@@ -4730,7 +4734,9 @@ def format_finding(result):
     return ("{head:<5} {fid} {severity:<6} [{kind}] {title} | stato={state} | "
             "controlli {cok}/{cn} | attacchi respinti {aok}/{an}{declared} | "
             "reason={reason}".format(
-                head="GREEN" if result["state"] == "GREEN" else "RED",
+                head=("GREEN" if result["state"] == "GREEN" else
+                      "N/A" if result["state"] == "NON-APPLICABILE" else
+                      "RED"),
                 fid=entry["id"], severity=entry["severity"],
                 kind=entry["kind"], title=entry["title"],
                 state=result["state"],
@@ -4843,7 +4849,8 @@ def main(argv=None):
                       nruns=len(runs), v=DR_VALIDATOR_REL,
                       vs="presente" if ctx["dr_validator"].is_file()
                       else "ASSENTE"))
-    open_findings = [item for item in findings if item["state"] != "GREEN"]
+    open_findings = [item for item in findings
+                     if item["state"] not in ("GREEN", "NON-APPLICABILE")]
     if findings:
         for result in findings:
             print(format_finding(result))
@@ -4862,7 +4869,8 @@ def main(argv=None):
                    for _, ok, _ in item["finding"].attacks]
         print("SUMMARY-REG: {n} regressioni della data room "
               "| GREEN {green} | RED CAUSALI {causal} | NON "
-              "DISCRIMINANTI {nd} | VACUI {vac} | PER ECCEZIONE {exc} | "
+              "DISCRIMINANTI {nd} | VACUI {vac} | NON APPLICABILI {na} | "
+              "PER ECCEZIONE {exc} | "
               "controlli validi {cok}/{cn} | attacchi respinti {aok}/{an}"
               .format(n=len(findings), review=REVIEW_COMMIT[:7],
                       cand=REJECTED_CANDIDATE[:7],
@@ -4870,6 +4878,7 @@ def main(argv=None):
                       causal=states.count("RED-CAUSALE"),
                       nd=states.count("NON-DISCRIMINANTE"),
                       vac=states.count("VACUO"),
+                      na=states.count("NON-APPLICABILE"),
                       exc=states.count("PER-ECCEZIONE"),
                       cok=sum(controls), cn=len(controls),
                       aok=sum(attacks), an=len(attacks)))

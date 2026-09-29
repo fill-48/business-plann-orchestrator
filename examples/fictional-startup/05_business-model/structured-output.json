@@ -1,0 +1,10 @@
+{
+  "business_model": {
+    "pricing_ref": "ASS-015",
+    "price": 780,
+    "revenue_ref": "ASS-020",
+    "contribution_margin_ref": "ASS-018",
+    "recurrence": "annual",
+    "channel": "direct"
+  }
+}

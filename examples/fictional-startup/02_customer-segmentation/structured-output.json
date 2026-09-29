@@ -1,0 +1,33 @@
+{
+  "customer_segments": [
+    {
+      "id": "SEG-001",
+      "name": "Catene retail/ristorazione 3-20 punti vendita (IT)",
+      "description": "Catene con pianificazione centralizzata dal titolare o da un operations manager",
+      "roles": {
+        "user": "store manager",
+        "buyer": "titolare",
+        "decision_maker": "titolare",
+        "influencer": "operations manager",
+        "payer": "titolare",
+        "gatekeeper": "consulente IT/paghe"
+      },
+      "problem_ref": "01_problem-and-need",
+      "problem_fit": "sostengono direttamente il costo di ASS-002",
+      "accessibility": "associazioni di categoria e consulenti paghe",
+      "buying_process": "demo -> pilota su 2-3 PV -> rollout, ciclo 1-2 mesi",
+      "size_refs": [
+        "ASS-004"
+      ],
+      "evidence_refs": [
+        "EVD-001",
+        "EVD-003"
+      ]
+    }
+  ],
+  "beachhead": {
+    "segment_ref": "SEG-001",
+    "selection_criteria": "intensità del problema x accessibilità via associazioni",
+    "rationale": "catene 3-20 PV: abbastanza grandi da pagare, abbastanza piccole da decidere in fretta"
+  }
+}

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Segnalare una vulnerabilità
+    url: https://github.com/fill-48/business-plann-orchestrator/security/advisories/new
+    about: Usa il canale privato di GitHub, non una issue pubblica.

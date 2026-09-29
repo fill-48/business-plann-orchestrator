@@ -1,0 +1,71 @@
+{
+  "description": "Profilo finanziario subscription_saas dello Stage 10. Il profilo e' un DATO DI CONFIGURAZIONE, non un ramo di codice: aggiungere un profilo significa aggiungere un file e i suoi test, il motore non cambia. role_measure_kind e role_unit_class NON dispensano il binding dal dichiarare measure_kind e conversion_policy: sono il valore ATTESO contro cui il validator confronta la dichiarazione, cosi' che una dichiarazione incoerente col ruolo sia rilevabile invece che accettata. Nessun valore economico vive qui: il profilo dichiara ruoli, nature di misura e classi di unita', mai prezzi, salari, tassi o importi.",
+  "schema_version": "1.0.0",
+  "profile_id": "subscription_saas",
+  "title": "Subscription SaaS",
+  "revenue_pattern": "subscription_recurring",
+  "required_driver_roles": [
+    "unit_price",
+    "customer_volume",
+    "churn_rate",
+    "variable_cost",
+    "headcount",
+    "payroll_unit_cost",
+    "opex"
+  ],
+  "optional_driver_roles": [
+    "conversion_rate",
+    "retention_rate",
+    "ops_capacity",
+    "milestone_cost",
+    "cash_buffer",
+    "serviceable_obtainable_market"
+  ],
+  "role_measure_kind": {
+    "unit_price": "per_unit",
+    "customer_volume": "stock",
+    "churn_rate": "rate",
+    "variable_cost": "per_unit",
+    "headcount": "stock",
+    "payroll_unit_cost": "per_unit",
+    "opex": "flow",
+    "conversion_rate": "rate",
+    "retention_rate": "rate",
+    "ops_capacity": "stock",
+    "milestone_cost": "flow",
+    "cash_buffer": "stock",
+    "serviceable_obtainable_market": "stock"
+  },
+  "role_unit_class": {
+    "unit_price": "per_unit",
+    "customer_volume": "level",
+    "churn_rate": "rate",
+    "variable_cost": "per_unit",
+    "headcount": "level",
+    "payroll_unit_cost": "per_unit",
+    "opex": "extensive",
+    "conversion_rate": "rate",
+    "retention_rate": "rate",
+    "ops_capacity": "level",
+    "milestone_cost": "extensive",
+    "cash_buffer": "level",
+    "serviceable_obtainable_market": "extensive"
+  },
+  "role_driver_class": {
+    "unit_price": "pricing",
+    "customer_volume": "volume",
+    "churn_rate": "churn",
+    "variable_cost": "cogs",
+    "headcount": "headcount",
+    "payroll_unit_cost": "payroll",
+    "opex": "opex",
+    "conversion_rate": "conversion",
+    "retention_rate": "retention",
+    "ops_capacity": "volume",
+    "milestone_cost": "milestone_cost",
+    "cash_buffer": "cash_buffer",
+    "serviceable_obtainable_market": "volume"
+  },
+  "not_applicable_modules": ["balance_sheet"],
+  "notes": "Il profilo esercita in un colpo solo tutte le classi di driver supportate — pricing, volume, conversione, retention/churn, costo variabile, costo fisso — e quindi tutte le riconciliazioni obbligatorie. churn_rate porta polarita' cost_like e retention_rate revenue_like: applicare Downside = High a entrambe sarebbe un errore di lettura. customer_volume e' dichiarato stock perche' in un modello a sottoscrizione la grandezza rilevante e' la base clienti installata a fine periodo, non l'acquisizione del periodo: la dichiarazione e' verificata contro measure_kind del binding e, dove l'interpretazione upstream non e' univoca, richiede un decision_ref. balance_sheet e' l'unico modulo dichiarato non applicabile e resta VISIBILE come NOT_APPLICABLE nominato nell'output."
+}

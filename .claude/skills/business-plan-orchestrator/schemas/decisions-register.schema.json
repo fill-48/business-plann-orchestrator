@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decisions Register",
+  "description": "Fonte canonica strutturata delle decisioni DEC-*. Vive in shared/decisions-register.json. L'allocazione del prossimo DEC-* usa esclusivamente gli id di definizione di decisions[] (mai il decision-log Markdown, che resta una vista umana derivata e append-only). ATTENZIONE: uniqueItems di JSON Schema confronta elementi interi e NON esprime l'unicità per chiave dentro un oggetto — due record con lo stesso id ma created_at diverso restano validi a schema. L'unicità di id e operation_id NON è quindi delegata a questo schema: è imposta dai controlli applicativi del loader del transaction manager, che tratta la violazione come stato canonico corrotto (exit 3). uniqueItems è usato dove esprime davvero il vincolo, cioè su target_refs (array di stringhe).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "decisions"],
+  "$defs": {
+    "sha256_lowercase": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "target_ref": {
+      "type": "string",
+      "pattern": "^(?:ASS-(?:[0-9]{3}|[1-9][0-9]{3,})|COND-[0-9]{3,})$"
+    }
+  },
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "initialized_from": {
+      "description": "Attestazione dell'inizializzazione lazy del registro su un progetto nato senza decisions-register (versione 0.2 della skill): sorgente letta, sua impronta sha256 e soglia di numerazione derivata. null per i registri nati insieme al progetto.",
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["source", "source_sha256", "derived_floor"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 },
+        "source_sha256": { "$ref": "#/$defs/sha256_lowercase" },
+        "derived_floor": { "type": "integer", "minimum": 0 },
+        "initialized_at": { "type": "string", "minLength": 1 },
+        "operation_id": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "operation_id",
+          "request_payload_hash",
+          "decision_type",
+          "target_refs",
+          "motivation",
+          "approver",
+          "created_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^DEC-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+            "description": "Forma canonica degli id, la stessa regex usata dall'allocatore: mai una regex più lasca (DEC-0021 non è un id valido)."
+          },
+          "operation_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Token opaco dell'operazione. Unicità imposta dal loader, non dallo schema."
+          },
+          "request_payload_hash": {
+            "$ref": "#/$defs/sha256_lowercase",
+            "description": "sha256 esadecimale minuscolo a 64 caratteri di canonical_hash_bytes(payload)."
+          },
+          "decision_type": {
+            "type": "string",
+            "enum": ["assumption_update", "condition_resolution"]
+          },
+          "target_refs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "$ref": "#/$defs/target_ref" }
+          },
+          "options_considered": { "type": "string" },
+          "motivation": { "type": "string", "minLength": 1 },
+          "impact": { "type": "string" },
+          "approver": { "type": "string", "minLength": 1 },
+          "created_at": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

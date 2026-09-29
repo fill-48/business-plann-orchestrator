@@ -1,0 +1,71 @@
+{
+  "description": "Profilo finanziario generic_startup — profilo di ripiego DEL CATALOGO dello Stage 10. Di ripiego DEL CATALOGO significa: e' il valore che il template di progetto SCRIVE in financial_config.financial_profile quando nessun profilo verticale descrive il progetto. NON e' un fallback di runtime: financial_profile e' una chiave required di financial_config, e la sua assenza e' financial_config_invalid -> FAIL, mai una sostituzione silenziosa. Nessun componente sostituisce generic_startup a un profilo mancante. Il profilo NON impone alcuna formula di ricavo: i ruoli di ricavo sono ammessi ma non richiesti, e in loro assenza il modulo revenue e' NOT_APPLICABLE nominato, mai un ricavo implicito. Nessun valore economico vive qui.",
+  "schema_version": "1.0.0",
+  "profile_id": "generic_startup",
+  "title": "Generic Startup",
+  "revenue_pattern": "unspecified",
+  "required_driver_roles": [
+    "headcount",
+    "payroll_unit_cost",
+    "opex"
+  ],
+  "optional_driver_roles": [
+    "unit_price",
+    "customer_volume",
+    "churn_rate",
+    "variable_cost",
+    "conversion_rate",
+    "retention_rate",
+    "ops_capacity",
+    "milestone_cost",
+    "cash_buffer",
+    "serviceable_obtainable_market"
+  ],
+  "role_measure_kind": {
+    "headcount": "stock",
+    "payroll_unit_cost": "per_unit",
+    "opex": "flow",
+    "unit_price": "per_unit",
+    "customer_volume": "stock",
+    "churn_rate": "rate",
+    "variable_cost": "per_unit",
+    "conversion_rate": "rate",
+    "retention_rate": "rate",
+    "ops_capacity": "stock",
+    "milestone_cost": "flow",
+    "cash_buffer": "stock",
+    "serviceable_obtainable_market": "stock"
+  },
+  "role_unit_class": {
+    "headcount": "level",
+    "payroll_unit_cost": "per_unit",
+    "opex": "extensive",
+    "unit_price": "per_unit",
+    "customer_volume": "level",
+    "churn_rate": "rate",
+    "variable_cost": "per_unit",
+    "conversion_rate": "rate",
+    "retention_rate": "rate",
+    "ops_capacity": "level",
+    "milestone_cost": "extensive",
+    "cash_buffer": "level",
+    "serviceable_obtainable_market": "extensive"
+  },
+  "role_driver_class": {
+    "headcount": "headcount",
+    "payroll_unit_cost": "payroll",
+    "opex": "opex",
+    "unit_price": "pricing",
+    "customer_volume": "volume",
+    "churn_rate": "churn",
+    "variable_cost": "cogs",
+    "conversion_rate": "conversion",
+    "retention_rate": "retention",
+    "ops_capacity": "volume",
+    "milestone_cost": "milestone_cost",
+    "cash_buffer": "cash_buffer",
+    "serviceable_obtainable_market": "volume"
+  },
+  "not_applicable_modules": ["balance_sheet"],
+  "notes": "Il profilo copre il caso in cui il modello di ricavo non e' ancora imposto: richiede i soli ruoli di costo strutturale — organico, costo unitario del personale e opex — che ogni startup ha comunque. I ruoli di ricavo restano OPZIONALI: se non sono legati, revenue, cogs, gross_margin e break_even sono NOT_APPLICABLE nominati con la motivazione, e i KPI che dipendono da essi sono NOT_APPLICABLE con il ruolo mancante nominato — mai omessi. Un profilo deeptech_prerevenue non e' incluso: quel caso non e' rappresentato da questo profilo."
+}

@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Proposed Assumptions (candidate contract)",
+  "description": "Contratto candidate separato per le assunzioni proposte P-ASS-*. Vive in <stage>/.working/<tx>/proposed-assumptions.json. Stessi obblighi del registro canonico, ma id transaction-local P-ASS-* e riferimenti che possono puntare sia ad ASS-* canonici sia a P-ASS-* della stessa transazione. Gli alias numerici (P-ASS-0001) sono vietati come nel canonico.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "category", "statement", "validation_status"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^P-ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$" },
+      "category": { "type": "string" },
+      "variable": { "type": "string" },
+      "statement": { "type": "string" },
+      "kind": { "type": "string", "enum": ["primary", "derived"] },
+      "derivation": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "formula": { "type": "string", "minLength": 1 },
+          "variables": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "string",
+              "pattern": "^(P-)?ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+            }
+          },
+          "method": {
+            "type": "string",
+            "enum": ["bottom_up", "top_down", "triangulation", "reconciliation"]
+          },
+          "strategy": {
+            "type": "string",
+            "enum": ["weighted_average", "selected_ref"]
+          },
+          "selected_ref": {
+            "type": "string",
+            "pattern": "^(P-)?ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+          }
+        },
+        "required": ["method", "variables"],
+        "if": {
+          "properties": { "strategy": { "const": "selected_ref" } },
+          "required": ["strategy"]
+        },
+        "then": { "required": ["selected_ref", "variables"] },
+        "else": { "required": ["formula", "variables"] }
+      },
+      "currency": { "type": ["string", "null"] },
+      "period": { "type": ["string", "null"] },
+      "scenario": {
+        "type": "string",
+        "enum": ["base", "downside", "upside"]
+      },
+      "evidence_classification": {
+        "type": "string",
+        "enum": [
+          "verified_fact",
+          "internal_evidence",
+          "external_source",
+          "founder_assumption",
+          "model_estimate",
+          "missing_information"
+        ]
+      },
+      "evidence_refs": {
+        "type": "array",
+        "items": { "type": "string", "pattern": "^EVD-[0-9]{3,}$" }
+      },
+      "rationale": { "type": "string" },
+      "decision_ref": {
+        "type": ["string", "null"],
+        "pattern": "^DEC-[0-9]{3,}$"
+      },
+      "value": { "type": ["string", "number", "boolean", "null"] },
+      "display_value": { "type": ["string", "null"] },
+      "unit": { "type": ["string", "null"] },
+      "base_case": { "type": ["string", "number", "null"] },
+      "downside_case": { "type": ["string", "number", "null"] },
+      "upside_case": { "type": ["string", "number", "null"] },
+      "source": { "type": "string" },
+      "owner": { "type": "string" },
+      "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+      "validation_status": {
+        "type": "string",
+        "enum": ["unvalidated", "validated", "rejected", "needs_info"]
+      },
+      "affected_sections": { "type": "array", "items": { "type": "string" } },
+      "last_updated": { "type": "string" },
+      "previous_values": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "superseded_at", "reason"],
+          "properties": {
+            "value": { "type": ["string", "number", "boolean", "null"] },
+            "display_value": { "type": ["string", "null"] },
+            "superseded_at": { "type": "string" },
+            "reason": { "type": "string" },
+            "decision_id": { "type": "string", "pattern": "^DEC-[0-9]{3,}$" }
+          }
+        }
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": { "kind": { "const": "derived" } },
+          "required": ["kind"]
+        },
+        "then": {
+          "required": [
+            "derivation",
+            "unit",
+            "currency",
+            "period",
+            "scenario",
+            "evidence_classification"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "derivation": {
+              "properties": { "strategy": { "const": "selected_ref" } },
+              "required": ["strategy"]
+            }
+          },
+          "required": ["derivation"]
+        },
+        "then": {
+          "required": ["rationale", "decision_ref"],
+          "properties": {
+            "decision_ref": {
+              "type": "string",
+              "pattern": "^DEC-[0-9]{3,}$"
+            }
+          }
+        }
+      },
+      {
+        "if": {
+          "properties": { "unit": { "const": "ratio" } },
+          "required": ["unit"]
+        },
+        "then": {
+          "properties": {
+            "value": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["value"]
+        }
+      }
+    ]
+  }
+}

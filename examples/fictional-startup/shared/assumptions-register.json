@@ -1,0 +1,872 @@
+[
+  {
+    "id": "ASS-001",
+    "category": "pricing",
+    "statement": "Prezzo di listino ipotizzato per punto vendita al mese",
+    "value": 65,
+    "unit": "EUR/PV/mese",
+    "base_case": 65,
+    "downside_case": 50,
+    "upside_case": 80,
+    "source": "Intervista con 1 titolare di catena su 4 (EVD-002)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "affected_sections": [
+      "00_idea-discovery",
+      "05_business-model",
+      "10_financial-plan"
+    ],
+    "last_updated": "2026-07-10"
+  },
+  {
+    "id": "ASS-002",
+    "category": "value-metric",
+    "statement": "Tempo settimanale risparmiato dal manager grazie a TurniDemo",
+    "value": 3.5,
+    "unit": "ore/settimana",
+    "base_case": 3.5,
+    "downside_case": 2,
+    "upside_case": 5,
+    "source": "Media dichiarata dalle 4 interviste qualitative (EVD-001..EVD-003)",
+    "owner": "founder",
+    "confidence": "medium",
+    "validation_status": "unvalidated",
+    "affected_sections": [
+      "00_idea-discovery",
+      "03_value-proposition"
+    ],
+    "last_updated": "2026-07-10"
+  },
+  {
+    "id": "ASS-003",
+    "category": "conversion",
+    "statement": "Tasso di conversione da demo a cliente pagante",
+    "value": null,
+    "unit": "%",
+    "base_case": null,
+    "downside_case": null,
+    "upside_case": null,
+    "source": "Nessun dato disponibile: nessuna demo ancora eseguita",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "needs_info",
+    "affected_sections": [
+      "06_go-to-market",
+      "10_financial-plan"
+    ],
+    "last_updated": "2026-07-10"
+  },
+  {
+    "id": "ASS-004",
+    "category": "market",
+    "variable": "eligible_pv",
+    "statement": "Punti vendita eleggibili in Italia (catene 3-20 PV, retail e ristorazione)",
+    "value": 60000,
+    "display_value": "60000 count",
+    "unit": "count",
+    "source": "Stima fittizia su dati camerali ipotetici (da validare, downside)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-005",
+    "category": "market",
+    "variable": "arpa_pv_year",
+    "statement": "Valore annuo per punto vendita: listino ASS-001 (65 EUR/PV/mese) x 12, nessuno sconto in Y1",
+    "value": 780,
+    "display_value": "780 EUR/count",
+    "unit": "EUR/count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "04_market-and-competition",
+      "05_business-model"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-006",
+    "category": "market",
+    "variable": "tam_topdown",
+    "statement": "TAM top-down: spesa software workforce management PMI Italia (report di settore, da validare)",
+    "value": 50000000,
+    "display_value": "50000000 EUR",
+    "unit": "EUR",
+    "source": "Report di settore citato in Sezione 0 (da acquisire nel source-register)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-007",
+    "category": "market",
+    "variable": "tam_bottomup",
+    "statement": "TAM bottom-up: punti vendita eleggibili x valore annuo",
+    "value": 46800000,
+    "display_value": "46800000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "eligible_pv": "ASS-004",
+        "arpa_pv_year": "ASS-005"
+      },
+      "formula": "eligible_pv * arpa_pv_year"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-008",
+    "category": "market",
+    "variable": "w_topdown",
+    "statement": "Peso della stima top-down nella riconciliazione TAM",
+    "value": 0.5,
+    "display_value": "0.5 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-009",
+    "category": "market",
+    "variable": "w_bottomup",
+    "statement": "Peso della stima bottom-up nella riconciliazione TAM",
+    "value": 0.5,
+    "display_value": "0.5 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-010",
+    "category": "market",
+    "variable": "tam_canonical",
+    "statement": "TAM riconciliato (media pesata dei due metodi)",
+    "value": 48400000,
+    "display_value": "48400000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "reconciliation",
+      "variables": {
+        "tam_topdown": "ASS-006",
+        "tam_bottomup": "ASS-007",
+        "w_topdown": "ASS-008",
+        "w_bottomup": "ASS-009"
+      },
+      "formula": "tam_topdown * w_topdown + tam_bottomup * w_bottomup",
+      "strategy": "weighted_average"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-011",
+    "category": "market",
+    "variable": "addressable_share",
+    "statement": "Quota del TAM servibile (catene multi-PV con budget software, vincoli di canale)",
+    "value": 0.25,
+    "display_value": "0.25 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-012",
+    "category": "market",
+    "variable": "sam_topdown",
+    "statement": "SAM: TAM riconciliato x quota servibile",
+    "value": 12100000,
+    "display_value": "12100000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "top_down",
+      "variables": {
+        "tam_canonical": "ASS-010",
+        "addressable_share": "ASS-011"
+      },
+      "formula": "tam_canonical * addressable_share"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-013",
+    "category": "market",
+    "variable": "reachable_pv_share",
+    "statement": "Quota di punti vendita raggiungibile in Y1 con la capacità commerciale reale",
+    "value": 0.02,
+    "display_value": "0.02 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "04_market-and-competition",
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-014",
+    "category": "market",
+    "variable": "som_y1_revenue",
+    "statement": "SOM Y1: punti vendita eleggibili x quota raggiungibile x valore annuo (bottom-up obbligatorio)",
+    "value": 936000,
+    "display_value": "936000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "04_market-and-competition"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "eligible_pv": "ASS-004",
+        "reachable_pv_share": "ASS-013",
+        "arpa_pv_year": "ASS-005"
+      },
+      "formula": "eligible_pv * reachable_pv_share * arpa_pv_year"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-015",
+    "category": "pricing",
+    "variable": "price_net_pv_year",
+    "statement": "Prezzo netto per punto vendita/anno: listino ASS-001 x 12 (nessuno sconto in Y1)",
+    "value": 780,
+    "display_value": "780 EUR/count",
+    "unit": "EUR/count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "05_business-model",
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-016",
+    "category": "cost",
+    "variable": "cogs_pv_year",
+    "statement": "Costi variabili di erogazione per PV/anno (hosting, SMS/notifiche, onboarding)",
+    "value": 120,
+    "display_value": "120 EUR/count",
+    "unit": "EUR/count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "05_business-model"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-017",
+    "category": "cost",
+    "variable": "support_pv_year",
+    "statement": "Costo di supporto per PV/anno",
+    "value": 60,
+    "display_value": "60 EUR/count",
+    "unit": "EUR/count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "05_business-model"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-018",
+    "category": "unit_economics",
+    "variable": "contribution_margin_pv",
+    "statement": "Contribution margin per PV/anno: prezzo netto - costi variabili unitari",
+    "value": 600,
+    "display_value": "600 EUR/count",
+    "unit": "EUR/count",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "05_business-model"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "price_net_pv_year": "ASS-015",
+        "cogs_pv_year": "ASS-016",
+        "support_pv_year": "ASS-017"
+      },
+      "formula": "price_net_pv_year - (cogs_pv_year + support_pv_year)"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-019",
+    "category": "demand",
+    "variable": "pv_active_y1",
+    "statement": "Punti vendita attivi a fine Y1 (coerente con il SOM: 60000 x 0.02)",
+    "value": 1200,
+    "display_value": "1200 count",
+    "unit": "count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "05_business-model",
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-020",
+    "category": "revenue",
+    "variable": "revenue_y1",
+    "statement": "Ricavo Y1 come formula di driver: PV attivi x prezzo netto",
+    "value": 936000,
+    "display_value": "936000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "05_business-model"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "pv_active_y1": "ASS-019",
+        "price_net_pv_year": "ASS-015"
+      },
+      "formula": "pv_active_y1 * price_net_pv_year"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-021",
+    "category": "gtm",
+    "variable": "leads_pv_y1",
+    "statement": "Punti vendita in pipeline Y1 (lead qualificati, canale diretto + associazioni)",
+    "value": 24000,
+    "display_value": "24000 count",
+    "unit": "count",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-022",
+    "category": "gtm",
+    "variable": "rate_lead_demo",
+    "statement": "Conversione lead -> demo",
+    "value": 0.25,
+    "display_value": "0.25 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-023",
+    "category": "gtm",
+    "variable": "rate_demo_close",
+    "statement": "Conversione demo -> cliente pagante (proxy di ASS-003, da validare col pilota)",
+    "value": 0.2,
+    "display_value": "0.2 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-024",
+    "category": "gtm",
+    "variable": "customers_out_pv_y1",
+    "statement": "Punti vendita acquisiti Y1: lead x prodotto dei tassi",
+    "value": 1200,
+    "display_value": "1200 count",
+    "unit": "count",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "leads_pv_y1": "ASS-021",
+        "rate_lead_demo": "ASS-022",
+        "rate_demo_close": "ASS-023"
+      },
+      "formula": "leads_pv_y1 * rate_lead_demo * rate_demo_close"
+    },
+    "currency": null,
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-025",
+    "category": "gtm",
+    "variable": "sm_spend_y1",
+    "statement": "Spesa sales & marketing Y1",
+    "value": 180000,
+    "display_value": "180000 EUR",
+    "unit": "EUR",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-026",
+    "category": "gtm",
+    "variable": "cac_pv",
+    "statement": "CAC per punto vendita: spesa S&M / PV acquisiti",
+    "value": 150,
+    "display_value": "150 EUR/count",
+    "unit": "EUR/count",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "sm_spend_y1": "ASS-025",
+        "customers_out_pv_y1": "ASS-024"
+      },
+      "formula": "sm_spend_y1 / customers_out_pv_y1"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-027",
+    "category": "gtm",
+    "variable": "churn_annual_pv",
+    "statement": "Churn annuo per punto vendita",
+    "value": 0.16,
+    "display_value": "0.16 ratio",
+    "unit": "ratio",
+    "source": "Founder + concept Sezione 0",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-24",
+    "previous_values": [
+      {
+        "value": 0.18,
+        "display_value": "0.18 ratio",
+        "superseded_at": "2026-07-24T06:31:12.767488+00:00",
+        "reason": "Churn rivisto al ribasso: primo cohort pilota mostra retention superiore all'ipotesi iniziale",
+        "decision_id": "DEC-003"
+      }
+    ]
+  },
+  {
+    "id": "ASS-028",
+    "category": "gtm",
+    "variable": "gtm_capacity_revenue_y1",
+    "statement": "Capacità GTM in ricavo: PV acquisiti x valore annuo (regge il SOM: 936000 >= 936000)",
+    "value": 936000,
+    "display_value": "936000 EUR",
+    "unit": "EUR",
+    "source": "Derivazione dal modello (ricalcolata dai validator)",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [
+      "06_go-to-market"
+    ],
+    "last_updated": "2026-07-16",
+    "previous_values": [],
+    "kind": "derived",
+    "derivation": {
+      "method": "bottom_up",
+      "variables": {
+        "customers_out_pv_y1": "ASS-024",
+        "arpa_pv_year": "ASS-005"
+      },
+      "formula": "customers_out_pv_y1 * arpa_pv_year"
+    },
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base"
+  },
+  {
+    "id": "ASS-029",
+    "category": "operations",
+    "variable": "ops_capacity_pv",
+    "statement": "Capacità operativa effettiva: installata x utilizzo",
+    "value": 1275,
+    "display_value": "1275 count",
+    "unit": "count",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": [],
+    "kind": "derived",
+    "currency": null,
+    "period": "Y1",
+    "scenario": "base",
+    "derivation": {
+      "method": "bottom_up",
+      "formula": "installed_capacity_pv * ops_utilization",
+      "variables": {
+        "installed_capacity_pv": "ASS-030",
+        "ops_utilization": "ASS-031"
+      }
+    }
+  },
+  {
+    "id": "ASS-030",
+    "category": "operations",
+    "variable": "installed_capacity_pv",
+    "statement": "Capacità installata: PV gestibili con lo stack attuale",
+    "value": 1500,
+    "display_value": "1500 count",
+    "unit": "count",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-031",
+    "category": "operations",
+    "variable": "ops_utilization",
+    "statement": "Utilizzo sostenibile della capacità in Y1",
+    "value": 0.85,
+    "display_value": "0.85 ratio",
+    "unit": "ratio",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-032",
+    "category": "team",
+    "variable": "fte_ceo",
+    "statement": "FTE del CEO co-founder sui processi core make",
+    "value": 1.0,
+    "display_value": "1.0 FTE",
+    "unit": "FTE",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-033",
+    "category": "team",
+    "variable": "fte_head_partnerships",
+    "statement": "FTE della posizione aperta Head of Partnerships",
+    "value": 1.0,
+    "display_value": "1.0 FTE",
+    "unit": "FTE",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-034",
+    "category": "team",
+    "variable": "cost_per_fte_year",
+    "statement": "Costo pieno annuo per FTE (RAL + oneri)",
+    "value": 45000.0,
+    "display_value": "45000.0 EUR/FTE",
+    "unit": "EUR/FTE",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "founder_assumption",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-035",
+    "category": "team",
+    "variable": "headcount_cost_partnerships",
+    "statement": "Costo headcount della posizione aperta: FTE x costo unitario",
+    "value": 45000.0,
+    "display_value": "45000.0 EUR",
+    "unit": "EUR",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": [],
+    "kind": "derived",
+    "currency": "EUR",
+    "period": "Y1",
+    "scenario": "base",
+    "derivation": {
+      "method": "bottom_up",
+      "formula": "fte_head_partnerships * cost_per_fte_year",
+      "variables": {
+        "fte_head_partnerships": "ASS-033",
+        "cost_per_fte_year": "ASS-034"
+      }
+    }
+  },
+  {
+    "id": "ASS-036",
+    "category": "roadmap",
+    "variable": "milestone_cost_mvp",
+    "statement": "Costo stimato della milestone (milestone_cost_mvp)",
+    "value": 90000.0,
+    "display_value": "90000.0 EUR",
+    "unit": "EUR",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-037",
+    "category": "roadmap",
+    "variable": "milestone_cost_partner_channel",
+    "statement": "Costo stimato della milestone (milestone_cost_partner_channel)",
+    "value": 45000.0,
+    "display_value": "45000.0 EUR",
+    "unit": "EUR",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-038",
+    "category": "roadmap",
+    "variable": "milestone_cost_delivery_scaleup",
+    "statement": "Costo stimato della milestone (milestone_cost_delivery_scaleup)",
+    "value": 30000.0,
+    "display_value": "30000.0 EUR",
+    "unit": "EUR",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  },
+  {
+    "id": "ASS-039",
+    "category": "roadmap",
+    "variable": "milestone_cost_governance_setup",
+    "statement": "Costo stimato della milestone (milestone_cost_governance_setup)",
+    "value": 15000.0,
+    "display_value": "15000.0 EUR",
+    "unit": "EUR",
+    "source": "Founder + analisi operativa",
+    "owner": "founder",
+    "confidence": "low",
+    "validation_status": "unvalidated",
+    "evidence_classification": "model_estimate",
+    "affected_sections": [],
+    "last_updated": "2026-07-24",
+    "previous_values": []
+  }
+]

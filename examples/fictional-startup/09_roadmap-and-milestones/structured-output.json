@@ -1,0 +1,100 @@
+{
+  "milestone_plan": {
+    "milestones": [
+      {
+        "id": "MIL-001",
+        "title": "MVP in produzione sui primi PV pilota",
+        "category": "technical",
+        "owner_ref": "ROLE-001",
+        "depends_on": [],
+        "start_date": "2026-09-01",
+        "target_date": "2026-12-15",
+        "cost_ref": "ASS-036",
+        "success_criteria": [
+          "10 PV pilota attivi per 30 giorni consecutivi"
+        ],
+        "go_no_go_rule": "Go se la retention pilota >= 70%",
+        "exit_criteria": "MVP stabile per 30 giorni consecutivi",
+        "risk_refs": [
+          "RISK-001"
+        ]
+      },
+      {
+        "id": "MIL-002",
+        "title": "Canale associazioni a regime",
+        "category": "commercial",
+        "owner_ref": "ROLE-002",
+        "depends_on": [
+          "MIL-001"
+        ],
+        "start_date": "2027-01-07",
+        "target_date": "2027-06-30",
+        "cost_ref": "ASS-037",
+        "success_criteria": [
+          "CAC <= 150 EUR/PV per due mesi consecutivi"
+        ],
+        "go_no_go_rule": "Go se il CAC resta entro il target del funnel",
+        "exit_criteria": "Canale replicabile e documentato",
+        "risk_refs": [
+          "RISK-002"
+        ]
+      },
+      {
+        "id": "MIL-003",
+        "title": "Onboarding industrializzato alla capacità dichiarata",
+        "category": "operational",
+        "owner_ref": "ROLE-001",
+        "depends_on": [
+          "MIL-001"
+        ],
+        "start_date": "2026-12-15",
+        "target_date": "2027-03-31",
+        "cost_ref": "ASS-038",
+        "success_criteria": [
+          "Lead time di attivazione < 48h sul 90% dei PV"
+        ],
+        "go_no_go_rule": "Go se la capacità misurata >= capacità dichiarata",
+        "exit_criteria": "Runbook operativo approvato e collaudato",
+        "risk_refs": [
+          "RISK-001"
+        ]
+      },
+      {
+        "id": "MIL-004",
+        "title": "Governance e deleghe formalizzate",
+        "category": "organizational",
+        "owner_ref": "ROLE-002",
+        "depends_on": [],
+        "start_date": "2026-09-01",
+        "target_date": "2026-11-30",
+        "cost_ref": "ASS-039",
+        "success_criteria": [
+          "Patto parasociale firmato e deleghe deliberate"
+        ],
+        "go_no_go_rule": "Go se le deleghe coprono ogni area di decision right",
+        "exit_criteria": "Verbale con le deleghe operative in vigore",
+        "risk_refs": []
+      }
+    ],
+    "financial_plan_inputs": {
+      "pricing_ref": "ASS-015",
+      "cogs_refs": [
+        "ASS-016"
+      ],
+      "funnel_customers_ref": "ASS-024",
+      "churn_ref": "ASS-027",
+      "ops_capacity_ref": "ASS-029",
+      "headcount_driver_refs": [
+        "ASS-032",
+        "ASS-033"
+      ],
+      "milestone_cost_refs": [
+        "ASS-036",
+        "ASS-037",
+        "ASS-038",
+        "ASS-039"
+      ],
+      "som_ref": "ASS-014"
+    }
+  }
+}

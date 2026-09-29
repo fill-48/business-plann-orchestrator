@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Config",
+  "description": "Configurazione di un progetto di business plan. Vive in shared/project-config.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_name", "project_slug", "created_at", "release_scope", "capability_map"],
+  "properties": {
+    "project_name": { "type": "string" },
+    "project_slug": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "created_at": { "type": "string" },
+    "cwd_path": { "type": "string" },
+    "methodology_version": { "type": "string" },
+    "release_scope": { "type": "string", "enum": ["0.1", "0.2", "0.3", "0.4"] },
+    "capability_map": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "step_back": { "$ref": "#/$defs/capability" },
+        "reverse_prompting": { "$ref": "#/$defs/capability" },
+        "prompt_contracts": { "$ref": "#/$defs/capability" },
+        "goal": { "$ref": "#/$defs/capability" },
+        "grant": { "$ref": "#/$defs/capability" },
+        "skill_creator": { "$ref": "#/$defs/capability" }
+      }
+    },
+    "financial_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Configurazione finanziaria letta dallo Stage 10. La proprieta' e' OPZIONALE e l'oggetto e' CHIUSO: un progetto senza financial_config resta schema-valido, e nessuno stage precedente al 10 la legge. Sei chiavi sono required e tre sono opzionali — nessuna via di mezzo. L'assenza di una qualunque delle sei chiavi required e' financial_config_invalid -> FAIL, con le chiavi mancanti NOMINATE: nessun valore e' sostituito. NON esiste alcun fallback di runtime: generic_startup, monthly e 36 periodi sono valori di INIZIALIZZAZIONE che il template di progetto scrive nel file, mai comportamenti del motore in assenza della chiave. Un financial_config privo di frequency non diventa mensile: fallisce. validate_canonical_state non valida project-config.json: la garanzia e' data dal gate di Stage 10, che fallisce prima di qualunque calcolo. Qui vivono politiche e coordinate temporali, MAI valori economici di piano.",
+      "required": [
+        "financial_profile",
+        "anchor_date",
+        "frequency",
+        "horizon_periods",
+        "currency",
+        "calculation_policy_version"
+      ],
+      "properties": {
+        "financial_profile": {
+          "type": "string",
+          "enum": ["subscription_saas", "generic_startup"],
+          "description": "Profilo attivo. L'enum elenca i profili disponibili; un valore fuori enum e' respinto dallo schema con lo stesso esito di una chiave mancante. generic_startup e' il profilo di ripiego DEL CATALOGO, non un fallback di runtime."
+        },
+        "anchor_date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+          "description": "Inizio del piano. DICHIARATO, mai derivato dall'orologio."
+        },
+        "frequency": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "annual"],
+          "description": "Frequenza del calendario finanziario."
+        },
+        "horizon_periods": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Orizzonte in numero di periodi. MAI una costante di codice."
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$",
+          "description": "Valuta unica di progetto in forma ISO-4217."
+        },
+        "calculation_policy_version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Versione della politica di calcolo — arrotondamento, tolleranze, conversione di frequenza, periodi parziali. Cambiarla cambia i numeri senza cambiare le formule, quindi deve essere visibile nell'audit."
+        },
+        "source_priority_overrides": {
+          "type": "object",
+          "additionalProperties": { "type": "integer" },
+          "description": "OPZIONALE. Sovrascrive l'ordine di risoluzione delle fonti. Assente: si applica l'ordine di default."
+        },
+        "cash_buffer_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "value"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["absolute", "months_of_burn"]
+            },
+            "value": { "type": "number", "minimum": 0 }
+          },
+          "description": "OPZIONALE. Soglia di buffer di cassa, assoluta o in mesi di burn. Assente: runway_to_buffer e funding_gap_to_buffer sono NOT_APPLICABLE DICHIARATO, mai uno zero implicito."
+        },
+        "scenario_coverage_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["threshold", "base_only_approvable"],
+          "properties": {
+            "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+            "base_only_approvable": { "type": "boolean" }
+          },
+          "description": "OPZIONALE. Soglia fra copertura piena e parziale degli scenari. Assente: si applica il default di policy. Il DIVIETO di etichettare scenari non differenziati resta un invariante architetturale, non configurabile."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "mode"],
+      "properties": {
+        "available": { "type": "boolean" },
+        "mode": { "type": "string", "enum": ["native", "skill", "fallback", "unavailable"] },
+        "checked_at": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

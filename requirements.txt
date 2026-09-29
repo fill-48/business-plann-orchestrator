@@ -1,0 +1,3 @@
+# Runtime requirement of the skill scripts (validators, transaction manager,
+# financial output generators) and of the test suite. Python >= 3.12.
+jsonschema>=4.18

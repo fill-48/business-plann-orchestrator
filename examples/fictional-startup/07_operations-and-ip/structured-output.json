@@ -1,0 +1,69 @@
+{
+  "operations_model": {
+    "core_processes": [
+      {
+        "id": "OPS-001",
+        "entity_type": "core_process",
+        "name": "Onboarding e configurazione del punto vendita",
+        "make_buy_partner": "make",
+        "owner_hint": "Head of Operations",
+        "bottleneck": true
+      },
+      {
+        "id": "OPS-004",
+        "entity_type": "core_process",
+        "name": "Erogazione SaaS e customer success continuativo",
+        "make_buy_partner": "make",
+        "owner_hint": "Head of Customer Success",
+        "bottleneck": false
+      },
+      {
+        "id": "OPS-005",
+        "entity_type": "core_process",
+        "name": "Distribuzione tramite associazioni di categoria",
+        "make_buy_partner": "partner",
+        "owner_hint": "Head of Partnerships",
+        "bottleneck": false
+      }
+    ],
+    "capacity_ref": "ASS-029",
+    "unit_ops_cost_refs": [
+      "ASS-016"
+    ],
+    "critical_dependencies": [
+      {
+        "id": "OPS-002",
+        "entity_type": "dependency",
+        "name": "Fornitore infrastruttura cloud (IaaS)",
+        "category": "infrastructure",
+        "single_source": true,
+        "mitigation": "architettura multi-region e piano di exit documentato verso un secondo provider"
+      }
+    ],
+    "regulatory_requirements": [
+      {
+        "requirement": "Trattamento dati dei dipendenti e dei turni (GDPR)",
+        "assessment": "DPA firmati con i sub-responsabili, registro dei trattamenti e minimizzazione dei dati"
+      },
+      {
+        "requirement": "Conformità alla normativa su orari di lavoro e riposi",
+        "assessment": "motore di scheduling con vincoli normativi parametrici, aggiornati su base contrattuale"
+      }
+    ],
+    "ip_strategy": {
+      "assets": [
+        {
+          "id": "OPS-003",
+          "entity_type": "ip_asset",
+          "name": "Motore di generazione turni conforme alla normativa",
+          "protection": "trade_secret",
+          "rationale": "algoritmo core non brevettabile, tenuto segreto e protetto da NDA e segregazione dei repository"
+        }
+      ],
+      "know_how_protection": "NDA con dipendenti e fornitori, segregazione degli accessi al codice core"
+    },
+    "risk_refs": [
+      "RISK-002"
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "EVD-001",
+    "statement": "Titolare catena retail #1: perde 3-4 ore/settimana pianificando i turni su Excel, ha già avuto un richiamo per turni non conformi alle ore di riposo.",
+    "classification": "internal_evidence",
+    "evidence_type": "interview",
+    "source": "Intervista founder, 2026-06-28",
+    "date": "2026-06-28",
+    "confidence": "medium",
+    "relevance": "high",
+    "affected_assumptions": ["ASS-002"],
+    "affected_sections": ["00_idea-discovery", "01_problem-and-need"],
+    "validation_action": "Confermare con pilota quantitativo su più punti vendita",
+    "status": "open"
+  },
+  {
+    "id": "EVD-002",
+    "statement": "Titolare catena ristorazione #1: pagherebbe 50-80€/punto vendita/mese per un tool che elimini i buchi di copertura.",
+    "classification": "founder_assumption",
+    "evidence_type": "interview",
+    "source": "Intervista founder, 2026-06-29",
+    "date": "2026-06-29",
+    "confidence": "low",
+    "relevance": "high",
+    "affected_assumptions": ["ASS-001"],
+    "affected_sections": ["00_idea-discovery", "05_business-model"],
+    "validation_action": "Validare il prezzo su almeno altri 3-4 interlocutori prima di consolidarlo",
+    "status": "open"
+  },
+  {
+    "id": "EVD-003",
+    "statement": "Titolare catena retail #2 e titolare catena ristorazione #2 confermano lo stesso problema (pianificazione manuale, errori di copertura) senza però validare il prezzo.",
+    "classification": "internal_evidence",
+    "evidence_type": "interview",
+    "source": "Interviste founder, 2026-06-30 e 2026-07-01",
+    "date": "2026-07-01",
+    "confidence": "medium",
+    "relevance": "high",
+    "affected_assumptions": ["ASS-002"],
+    "affected_sections": ["00_idea-discovery", "01_problem-and-need"],
+    "validation_action": "Includere nel campione del pilota quantitativo",
+    "status": "open"
+  },
+  {
+    "id": "EVD-004",
+    "statement": "Esistono mockup Figma del prodotto, ma nessun MVP funzionante e nessun pilota quantitativo eseguito.",
+    "classification": "missing_information",
+    "evidence_type": "product_status",
+    "source": "Dichiarazione founder",
+    "date": "2026-07-10",
+    "confidence": "high",
+    "relevance": "high",
+    "affected_assumptions": ["ASS-002", "ASS-003"],
+    "affected_sections": ["00_idea-discovery"],
+    "validation_action": "Costruire MVP e avviare pilota su 10-15 punti vendita (da sviluppare negli stage successivi)",
+    "status": "open"
+  }
+]

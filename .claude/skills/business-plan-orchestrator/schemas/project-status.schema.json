@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Project Status",
+  "description": "Stato corrente del progetto (reference/architecture.md §12.1). Reso come front matter/YAML dentro shared/project-status.md; questo schema descrive la forma dei dati.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_name", "current_stage", "last_updated", "next_action"],
+  "properties": {
+    "project_name": { "type": "string" },
+    "current_stage": { "type": "string" },
+    "current_task": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["not_started", "in_progress", "conflict_awaiting_confirmation",
+               "needs_revision", "blocked", "approved_with_conditions",
+               "approved"]
+    },
+    "completed_stages": { "type": "array", "items": { "type": "string" } },
+    "pending_stages": { "type": "array", "items": { "type": "string" } },
+    "approved_decisions": { "type": "array", "items": { "type": "string" } },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "critical_assumptions": { "type": "array", "items": { "type": "string" } },
+    "blocking_issues": { "type": "array", "items": { "type": "string" } },
+    "last_updated": { "type": "string" },
+    "next_action": { "type": "string" }
+  }
+}

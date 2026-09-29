@@ -1,0 +1,16 @@
+{
+  "project_name": "TurniDemo",
+  "project_slug": "fictional-startup",
+  "created_at": "2026-07-10",
+  "cwd_path": "examples/fictional-startup",
+  "methodology_version": "0.1.0",
+  "release_scope": "0.1",
+  "capability_map": {
+    "step_back": { "available": false, "mode": "fallback", "checked_at": "2026-07-10T09:00:00" },
+    "reverse_prompting": { "available": false, "mode": "fallback", "checked_at": "2026-07-10T09:00:00" },
+    "prompt_contracts": { "available": false, "mode": "fallback", "checked_at": "2026-07-10T09:00:00" },
+    "goal": { "available": false, "mode": "unavailable", "checked_at": "2026-07-10T09:00:00", "notes": "Review loop finale non incluso nella versione 0.7.1" },
+    "grant": { "available": false, "mode": "unavailable", "checked_at": "2026-07-10T09:00:00", "notes": "Review loop finale non incluso nella versione 0.7.1" },
+    "skill_creator": { "available": true, "mode": "skill", "checked_at": "2026-07-10T09:00:00" }
+  }
+}

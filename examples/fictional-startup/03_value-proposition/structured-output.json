@@ -1,0 +1,56 @@
+{
+  "value_proposition": {
+    "id": "VP-001",
+    "segment_ref": "SEG-001",
+    "jobs": [
+      "coprire i turni di tutti i PV senza buchi",
+      "gestire assenze e picchi stagionali"
+    ],
+    "pains": [
+      "3-4 ore/settimana di pianificazione manuale",
+      "errori di copertura scoperti all'ultimo"
+    ],
+    "gains": [
+      "turni pubblicati in minuti",
+      "conformità CCNL verificata automaticamente"
+    ],
+    "mapping": [
+      {
+        "pain": "pianificazione manuale",
+        "reliever": "generazione automatica dei turni multi-PV"
+      },
+      {
+        "pain": "errori di copertura",
+        "reliever": "alert su buchi e sovrapposizioni"
+      },
+      {
+        "gain": "conformità CCNL",
+        "creator": "regole CCNL precaricate (roadmap)"
+      }
+    ],
+    "switching_rationale": "vs Excel+WhatsApp: tempo e errori; vs enterprise: prezzo e semplicità",
+    "value_metrics": [
+      {
+        "metric": "ore risparmiate/settimana",
+        "ref": "ASS-002"
+      }
+    ],
+    "proof_points": [
+      {
+        "claim": "i manager perdono 3-4 ore/settimana col processo manuale",
+        "evidence_classification": "internal_evidence",
+        "evidence_refs": [
+          "EVD-001",
+          "EVD-003"
+        ]
+      },
+      {
+        "claim": "disponibilità a pagare 50-80 EUR/PV/mese",
+        "evidence_classification": "founder_assumption",
+        "evidence_refs": [
+          "EVD-002"
+        ]
+      }
+    ]
+  }
+}

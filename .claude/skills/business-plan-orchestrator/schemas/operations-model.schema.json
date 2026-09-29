@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Operations Model (Stage 7)",
+  "description": "Structured output dello Stage 7 07_operations-and-ip. Le definizioni OPS-* vivono solo qui: ogni definizione dichiara un entity_type vincolato con const al proprio sito di definizione, così il tipo non può divergere dall'array che la contiene. I quantitativi restano sempre ASS-*: capacity_ref e unit_ops_cost_refs sono referenze, mai letterali.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["operations_model"],
+  "$defs": {
+    "ops_id": {
+      "type": "string",
+      "pattern": "^OPS-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Id OPS-* in forma canonica (tre cifre zero-padded fino a 999, poi numeri pieni); gli alias tipo OPS-0001 non sono id validi."
+    },
+    "ass_ref": {
+      "type": "string",
+      "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "risk_ref": {
+      "type": "string",
+      "pattern": "^RISK-[0-9]{3,}$"
+    },
+    "assessed_or_none": {
+      "description": "Un elemento è valutato oppure dichiara esplicitamente none_identified con la propria rationale. Il silenzio non è una valutazione.",
+      "oneOf": [
+        {
+          "required": ["assessment"],
+          "not": { "required": ["none_identified"] }
+        },
+        {
+          "required": ["none_identified", "rationale"],
+          "properties": { "none_identified": { "const": true } }
+        }
+      ]
+    }
+  },
+  "properties": {
+    "operations_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "core_processes",
+        "capacity_ref",
+        "unit_ops_cost_refs",
+        "critical_dependencies",
+        "regulatory_requirements",
+        "ip_strategy",
+        "risk_refs"
+      ],
+      "properties": {
+        "core_processes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "entity_type",
+              "name",
+              "make_buy_partner",
+              "owner_hint",
+              "bottleneck"
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/ops_id" },
+              "entity_type": {
+                "const": "core_process",
+                "description": "Sito di definizione core_processes[] → entity_type core_process. Solo queste definizioni sono risolvibili da covers_processes[] di Stage 8."
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "make_buy_partner": {
+                "type": "string",
+                "enum": ["make", "buy", "partner"]
+              },
+              "owner_hint": { "type": "string", "minLength": 1 },
+              "bottleneck": { "type": "boolean" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "capacity_ref": {
+          "$ref": "#/$defs/ass_ref",
+          "description": "Capacità operativa come ASS-* derived, ricalcolabile dalla Formula DSL; mai un valore letterale."
+        },
+        "unit_ops_cost_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ass_ref" },
+          "description": "Costi operativi unitari referenziati agli ASS-* COGS dello Stage 5: il dato vive una sola volta."
+        },
+        "critical_dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "entity_type", "name", "category"],
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "required": ["mitigation"],
+                    "not": { "required": ["none_identified"] }
+                  },
+                  {
+                    "required": ["none_identified", "rationale"],
+                    "properties": { "none_identified": { "const": true } }
+                  }
+                ]
+              }
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/ops_id" },
+              "entity_type": {
+                "const": "dependency",
+                "description": "Sito di definizione critical_dependencies[] → entity_type dependency: non risolvibile da covers_processes[]."
+              },
+              "name": { "type": "string", "minLength": 1 },
+              "category": { "type": "string", "minLength": 1 },
+              "single_source": { "type": "boolean" },
+              "mitigation": { "type": "string", "minLength": 1 },
+              "none_identified": { "type": "boolean" },
+              "rationale": { "type": "string", "minLength": 1 },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "regulatory_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["requirement"],
+            "allOf": [{ "$ref": "#/$defs/assessed_or_none" }],
+            "properties": {
+              "requirement": { "type": "string", "minLength": 1 },
+              "assessment": { "type": "string", "minLength": 1 },
+              "none_identified": { "type": "boolean" },
+              "rationale": { "type": "string", "minLength": 1 },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "ip_strategy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["assets"],
+          "properties": {
+            "assets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "entity_type",
+                  "name",
+                  "protection",
+                  "rationale"
+                ],
+                "properties": {
+                  "id": { "$ref": "#/$defs/ops_id" },
+                  "entity_type": {
+                    "const": "ip_asset",
+                    "description": "Sito di definizione ip_strategy.assets[] → entity_type ip_asset: non risolvibile da covers_processes[]."
+                  },
+                  "name": { "type": "string", "minLength": 1 },
+                  "protection": {
+                    "type": "string",
+                    "enum": [
+                      "patent",
+                      "trademark",
+                      "copyright",
+                      "trade_secret",
+                      "contractual",
+                      "none"
+                    ]
+                  },
+                  "rationale": { "type": "string", "minLength": 1 },
+                  "notes": { "type": "string" }
+                }
+              }
+            },
+            "know_how_protection": { "type": "string" }
+          }
+        },
+        "risk_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/risk_ref" }
+        }
+      }
+    }
+  }
+}

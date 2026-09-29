@@ -1,0 +1,1142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Financial Plan (Stage 10)",
+  "description": "Structured output dello Stage 10 10_financial-plan. Lo schema e' CHIUSO a ogni livello (additionalProperties: false) e dichiara le sezioni autoritative dell'unico canonico di stage: driver_registry, results, reconciliations, validation, calculation_metadata e governance. La radice segue la convenzione degli altri stage, che avvolgono il contenuto in una sola chiave omonima dello stage. Il REGISTRO DEI DRIVER (namespace DRV-) vive ESCLUSIVAMENTE nella sezione driver_registry di questo schema: non esiste un file di schema separato. Il registry porta riferimenti e metadati di binding, MAI una seconda copia del valore canonico: base_value, scenario_values e formula_or_derivation sono assenti per costruzione. I valori risolti vivono in results come snapshot immutabile del calcolo. Questo schema descrive solo la forma dell'output: calcolo, validazione e resa appartengono ai validator e ai renderer dello Stage 10. Le classi di driver, i moduli e le riconciliazioni dichiarati qui sono il perimetro attuale del piano finanziario: le classi e i moduli opzionali ne sono esclusi, e introdurli richiederebbe un'estensione esplicita e additiva dello schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "financial_plan"],
+  "$defs": {
+    "drv_id": {
+      "type": "string",
+      "pattern": "^DRV-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Id canonico del driver nel namespace DRV-. Un solo stage di definizione: 10_financial-plan."
+    },
+    "ass_ref": {
+      "type": "string",
+      "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "evd_ref": {
+      "type": "string",
+      "pattern": "^EVD-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "dec_ref": {
+      "type": "string",
+      "pattern": "^DEC-(?:[0-9]{3}|[1-9][0-9]{3,}|S10-[0-9]{2})$"
+    },
+    "mil_ref": {
+      "type": "string",
+      "pattern": "^MIL-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "cond_ref": {
+      "type": "string",
+      "pattern": "^COND-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "iso_date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "period_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Indice di periodo 0..horizon_periods-1. Mai una data derivata dal nome di un'etichetta upstream."
+    },
+    "amount": {
+      "type": ["number", "string"],
+      "description": "Grandezza numerica. La forma stringa e' ammessa per preservare la precisione Decimal degli accumuli (arrotondamento ROUND_HALF_UP alla sola presentazione)."
+    },
+    "period_series": {
+      "type": "object",
+      "description": "Serie per periodo: chiave = indice di periodo in forma decimale, valore = grandezza del periodo.",
+      "additionalProperties": { "$ref": "#/$defs/amount" },
+      "propertyNames": { "pattern": "^(?:0|[1-9][0-9]*)$" }
+    },
+    "driver_class": {
+      "type": "string",
+      "description": "Classe canonica del driver nel perimetro attuale. Le classi opzionali (capex, working_capital, tax, financing, grant) e le classi di Stage 11 sono deliberatamente ESCLUSE da questo enum: introdurle richiede un'estensione esplicita e additiva dello schema, mai un'estensione silenziosa.",
+      "enum": [
+        "revenue",
+        "pricing",
+        "volume",
+        "conversion",
+        "retention",
+        "churn",
+        "cogs",
+        "headcount",
+        "payroll",
+        "opex",
+        "milestone_cost",
+        "cash_buffer"
+      ]
+    },
+    "measure_kind": {
+      "type": "string",
+      "description": "Natura della misura, DICHIARATA e mai inferita dal nome ne' dall'unita'. Determina le regole di timing ammesse e l'esenzione da REC-12.",
+      "enum": ["flow", "stock", "rate", "per_unit"]
+    },
+    "frequency": {
+      "type": "string",
+      "description": "Frequenza nativa del driver, DICHIARATA e mai inferita.",
+      "enum": ["one_off", "monthly", "quarterly", "annual", "per_unit"]
+    },
+    "calendar_frequency": {
+      "type": "string",
+      "enum": ["monthly", "quarterly", "annual"]
+    },
+    "conversion_policy": {
+      "type": "string",
+      "description": "Politica di conversione dalla frequenza nativa a quella del calendario, verificata contro la classe di unita'. Nessuna conversione implicita: la sua assenza e' driver_conversion_policy_undeclared, non un default.",
+      "enum": [
+        "allocate",
+        "carry_level",
+        "compound",
+        "require_native_frequency",
+        "preserve_rate"
+      ]
+    },
+    "timing_rule": {
+      "type": "string",
+      "description": "Regola di ripartizione per measure_kind flow o regola di livello per measure_kind stock; NOT_APPLICABLE per rate e per_unit, dove il valore non si ripartisce. Le regole opzionali (ramp, step, seasonal, formula) non sono supportate.",
+      "enum": [
+        "one_off",
+        "uniform",
+        "front_loaded",
+        "back_loaded",
+        "milestone_start",
+        "milestone_end",
+        "custom_schedule",
+        "constant",
+        "step_level",
+        "from_schedule",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "scenario_polarity": {
+      "type": "string",
+      "description": "Lettura di downside/upside. Deriva dalla classe e puo' essere sovrascritta con motivazione obbligatoria. Applicare Downside = High a tutto e' vietato: churn e' cost_like, retention e' revenue_like.",
+      "enum": ["cost_like", "revenue_like", "timing_like", "neutral"]
+    },
+    "driver_status": {
+      "type": "string",
+      "description": "Stato del driver, prodotto da una mappatura TOTALE e fail-closed. Nessuna formula, default, arrotondamento, aggregazione o scelta di scenario puo' promuovere placeholder o unresolved.",
+      "enum": ["unresolved", "placeholder", "inferred", "confirmed"]
+    },
+    "binding_method": {
+      "type": "string",
+      "description": "Modalita' di risoluzione del binding, in ordine di precedenza. explicit_declaration richiede SEMPRE decision_ref.",
+      "enum": [
+        "fpi_declared",
+        "upstream_field",
+        "derivation_closure",
+        "explicit_declaration"
+      ]
+    },
+    "cost_category": {
+      "type": "string",
+      "description": "Tassonomia di fonti e usi. Le categorie sono mutuamente esclusive: e' la difesa strutturale contro il doppio conteggio, misurata dal residuo di REC-13. funding_gap e cash_buffer non compaiono qui perche' non sono ne' fonte ne' uso.",
+      "enum": [
+        "operating_revenue",
+        "other_operating_income",
+        "operating_cost",
+        "interest",
+        "mandatory_financing_fee"
+      ]
+    },
+    "check_status": {
+      "type": "string",
+      "description": "Tassonomia di validazione completa. La presenza di una formula non e' mai sufficiente per PASS.",
+      "enum": [
+        "PASS",
+        "STRUCTURE_PRESENT",
+        "RUNTIME_REQUIRED",
+        "UNRESOLVED_INPUT",
+        "WARNING",
+        "FAIL",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "canonical_check_status": {
+      "type": "string",
+      "description": "Stati ammessi per gli esiti del CALCOLO CANONICO. STRUCTURE_PRESENT e RUNTIME_REQUIRED sono strutturalmente esclusi qui: nel canonico tutto e' calcolato in Python, e la loro presenza significherebbe che il motore non ha calcolato cio' che dichiarava di calcolare. Restano legittimi nel report di QA del workbook, che NON e' descritto da questo schema.",
+      "enum": [
+        "PASS",
+        "UNRESOLVED_INPUT",
+        "WARNING",
+        "FAIL",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "module_status": {
+      "type": "string",
+      "enum": ["PASS", "WARNING", "NOT_APPLICABLE"]
+    },
+    "cost_line": {
+      "type": "object",
+      "description": "Riga di costo o di ricavo CATEGORIZZATA: senza di essa REC-13 non ha un produttore.",
+      "additionalProperties": false,
+      "required": ["line_id", "category", "series"],
+      "properties": {
+        "line_id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "category": { "$ref": "#/$defs/cost_category" },
+        "driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/drv_id" }
+        },
+        "series": { "$ref": "#/$defs/period_series" }
+      }
+    },
+    "module_result": {
+      "type": "object",
+      "description": "Esito di un modulo di calcolo. Un modulo non pertinente al profilo attivo e' NOT_APPLICABLE con motivazione NOMINATA, mai omesso in silenzio.",
+      "additionalProperties": false,
+      "required": ["module_id", "status"],
+      "properties": {
+        "module_id": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/module_status" },
+        "not_applicable_reason": { "type": "string", "minLength": 1 },
+        "input_driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/drv_id" }
+        },
+        "series": { "$ref": "#/$defs/period_series" },
+        "lines": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cost_line" }
+        },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/amount" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "not_applicable_module": {
+      "type": "object",
+      "description": "Forma dell'omissione DICHIARATA e VISIBILE di un modulo: NOT_APPLICABLE nominato, con motivazione e riferimento alla decisione che la giustifica (decision_ref). Nessuna omissione silenziosa e' ammessa.",
+      "additionalProperties": false,
+      "required": ["module_id", "status", "reason", "decision_ref"],
+      "properties": {
+        "module_id": { "type": "string", "minLength": 1 },
+        "status": { "const": "NOT_APPLICABLE" },
+        "reason": { "type": "string", "minLength": 1 },
+        "decision_ref": { "$ref": "#/$defs/dec_ref" }
+      }
+    },
+    "kpi_indicator": {
+      "type": "object",
+      "description": "Indicatore del set minimo. Un KPI privo dei driver necessari e' NOT_APPLICABLE con il nome del driver mancante, MAI omesso: un indicatore assente da un report si legge come non pertinente, mentre la verita' e' che il dato non c'e'.",
+      "additionalProperties": false,
+      "required": ["kpi_id", "status"],
+      "properties": {
+        "kpi_id": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/canonical_check_status" },
+        "value": { "$ref": "#/$defs/amount" },
+        "unit": { "type": "string", "minLength": 1 },
+        "series": { "$ref": "#/$defs/period_series" },
+        "recomputable_from": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "missing_driver_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Ruoli mancanti che rendono il KPI non calcolabile. Obbligatorio in sostanza quando status e' NOT_APPLICABLE: e' cio' che distingue non pertinente da non abbiamo il dato."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "description": "Contratto di riconciliazione. Ogni riconciliazione e' riportata SEMPRE, anche quando passa: un controllo che non compare nel report equivale a un controllo non eseguito.",
+      "additionalProperties": false,
+      "required": ["rec_id", "formula", "status", "severity", "tolerance", "tolerance_unit"],
+      "properties": {
+        "rec_id": { "type": "string", "minLength": 1 },
+        "formula": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/canonical_check_status" },
+        "severity": { "type": "string", "enum": ["FAIL", "WARNING"] },
+        "expected": { "$ref": "#/$defs/amount" },
+        "actual": { "$ref": "#/$defs/amount" },
+        "residual": { "$ref": "#/$defs/amount" },
+        "residual_breakdown": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/amount" }
+        },
+        "tolerance": { "type": "string", "minLength": 1 },
+        "tolerance_unit": { "type": "string", "enum": ["EUR", "ratio", "count", "FTE"] },
+        "affected_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "not_applicable_reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scenario_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario", "status"],
+      "properties": {
+        "scenario": { "type": "string", "enum": ["base", "downside", "upside"] },
+        "status": { "$ref": "#/$defs/canonical_check_status" },
+        "not_applicable_reason": { "type": "string", "minLength": 1 },
+        "driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/drv_id" }
+        },
+        "series": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/period_series" }
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/amount" }
+        },
+        "output_checksum": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "driver_entry": {
+      "type": "object",
+      "description": "Voce del registro canonico dei driver. Contiene riferimenti, metadati di binding e stato — MAI il valore. base_value, scenario_values e formula_or_derivation sono assenti, non declassati a informativi: un campo informativo che duplica un numero autoritativo e' comunque un numero che puo' divergere.",
+      "additionalProperties": false,
+      "required": [
+        "driver_id",
+        "semantic_name",
+        "driver_class",
+        "role",
+        "source_ref",
+        "source_path",
+        "source_record_hash",
+        "unit",
+        "currency",
+        "measure_kind",
+        "frequency",
+        "conversion_policy",
+        "timing_rule",
+        "start_period",
+        "end_period",
+        "scenario_polarity",
+        "status",
+        "source_priority",
+        "binding_method",
+        "double_count_risk",
+        "input_kind"
+      ],
+      "properties": {
+        "driver_id": { "$ref": "#/$defs/drv_id" },
+        "semantic_name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Slug inglese, unico nel progetto."
+        },
+        "driver_class": { "$ref": "#/$defs/driver_class" },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Ruolo del profilo attivo: appartiene a required_driver_roles[] o a optional_driver_roles[] del file di profilo."
+        },
+        "source_ref": { "$ref": "#/$defs/ass_ref" },
+        "source_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "JSON path in un artefatto canonico upstream che deve risolvere ESATTAMENTE a source_ref. Non e' documentazione: e' l'oggetto del controllo driver_source_path_unverifiable."
+        },
+        "source_record_hash": {
+          "$ref": "#/$defs/sha256",
+          "description": "record_fingerprint del record ASS-* al momento del binding: rileva il drift dopo update-assumption."
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Copiata dal record, MAI dedotta. Un record senza unit non e' legabile: driver_unit_absent."
+        },
+        "currency": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO-4217 oppure null per i driver non monetari. Unica per progetto."
+        },
+        "measure_kind": { "$ref": "#/$defs/measure_kind" },
+        "frequency": { "$ref": "#/$defs/frequency" },
+        "conversion_policy": { "$ref": "#/$defs/conversion_policy" },
+        "timing_rule": { "$ref": "#/$defs/timing_rule" },
+        "timing_schedule": {
+          "type": "object",
+          "description": "Schedule esplicita per custom_schedule, step_level e from_schedule: chiave = indice di periodo, valore = quota o livello.",
+          "additionalProperties": { "$ref": "#/$defs/amount" },
+          "propertyNames": { "pattern": "^(?:0|[1-9][0-9]*)$" }
+        },
+        "start_period": { "type": ["integer", "null"], "minimum": 0 },
+        "end_period": { "type": ["integer", "null"], "minimum": 0 },
+        "scenario_polarity": { "$ref": "#/$defs/scenario_polarity" },
+        "polarity_override_rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Obbligatorio in sostanza quando scenario_polarity diverge dal default della classe."
+        },
+        "status": { "$ref": "#/$defs/driver_status" },
+        "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+        "source_priority": { "type": "integer" },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evd_ref" }
+        },
+        "decision_ref": {
+          "oneOf": [{ "$ref": "#/$defs/dec_ref" }, { "type": "null" }],
+          "description": "Obbligatorio quando il binding risolve un conflitto, quando l'interpretazione upstream non e' univoca e SEMPRE per explicit_declaration."
+        },
+        "upstream_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/ass_ref" }
+        },
+        "binding_method": { "$ref": "#/$defs/binding_method" },
+        "exhaustive_search": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Path canonici ispezionati e non risolutivi: obbligatorio in sostanza per explicit_declaration."
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "double_count_risk": {
+          "type": "string",
+          "enum": ["none", "conditional", "declared"]
+        },
+        "input_kind": {
+          "type": "string",
+          "enum": ["operational", "informational", "derived"],
+          "description": "Un driver informational non e' MAI consumato dal motore."
+        },
+        "scenario_coverage": {
+          "type": "string",
+          "enum": ["full", "none"],
+          "description": "Presenza della terna base/downside/upside sul record legato. none conta come NON coperto: nessun valore e' inventato e nessun moltiplicatore di default e' applicato."
+        },
+        "notes": { "type": "string" },
+        "materiality": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Materialita' finanziaria del driver, OPZIONALE. NESSUNA SOGLIA NUMERICA e' fissata, dedotta o inferita: nessuna soglia viene inventata dove non e' dichiarata. Dove il campo e' ASSENTE la resa e' «non dichiarata»: MAI «bassa», MAI vuota, MAI dedotta. NESSUN percorso usa materiality per decidere investor_readiness."
+        },
+        "materiality_basis": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Dichiara SU CHE COSA la materialita' e' stata giudicata. E' una dichiarazione di base del giudizio, non una soglia."
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "official",
+            "industry_report",
+            "academic",
+            "news",
+            "company",
+            "interview",
+            "internal",
+            "estimate",
+            "other"
+          ],
+          "description": "Tipo di fonte del driver, OPZIONALE. L'enum e' RIUSATO ALLA LETTERA da schemas/source-register.schema.json (items.properties.source_type.enum): nessun enum parallelo e' coniato, e una divergenza fra i due e' un difetto rilevato dai test di integrazione."
+        }
+      }
+    },
+    "governance_module_entry": {
+      "type": "object",
+      "description": "Voce di GOVERNANCE per un modulo: porta STATO e RIFERIMENTI, MAI una quantita'. Nessun tipo numerico e' dichiarato qui, a nessuna profondita'.",
+      "additionalProperties": false,
+      "required": ["propagated_status", "status"],
+      "properties": {
+        "propagated_status": { "$ref": "#/$defs/driver_status" },
+        "status": { "$ref": "#/$defs/module_status" },
+        "not_applicable_reason": { "type": "string", "minLength": 1 },
+        "input_driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/drv_id" }
+        }
+      }
+    },
+    "governance_scenario_entry": {
+      "type": "object",
+      "description": "Voce di GOVERNANCE per uno scenario: uno stato SEPARATO per ciascuno scenario, calcolato sul PROPRIO set risolto. Uno scenario NON prodotto NON e' omesso: porta status NOT_APPLICABLE con not_applicable_reason NOMINATA, che e' la disciplina che results.scenarios gia' applica. Nessun tipo numerico e' dichiarato qui, a nessuna profondita'.",
+      "additionalProperties": false,
+      "required": ["propagated_status", "status"],
+      "properties": {
+        "propagated_status": { "$ref": "#/$defs/driver_status" },
+        "status": { "$ref": "#/$defs/module_status" },
+        "not_applicable_reason": { "type": "string", "minLength": 1 },
+        "driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/drv_id" }
+        }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "minLength": 1,
+      "const": "1.1.0",
+      "description": "Versione dello schema di output dello Stage 10, fissata a \"1.1.0\": semantica MINOR per estensioni additive e retrocompatibili, MAJOR per modifiche che invaliderebbero documenti esistenti. Resta DISTINTA da calculation_metadata.calculation_policy_version, che versiona arrotondamento, tolleranze e conversioni: le due versioni non sono unificate e non si inseguono."
+    },
+    "financial_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "driver_registry",
+        "results",
+        "reconciliations",
+        "validation",
+        "calculation_metadata",
+        "governance"
+      ],
+      "properties": {
+        "driver_registry": {
+          "type": "object",
+          "description": "SEZIONE — registro canonico dei driver, UNICA SEDE del namespace DRV-. Non esiste un file schemas/financial-driver-register.schema.json.",
+          "additionalProperties": false,
+          "required": ["engine_version", "formula_version", "drivers"],
+          "properties": {
+            "engine_version": { "type": "string", "minLength": 1 },
+            "formula_version": { "type": "string", "minLength": 1 },
+            "profile_id": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "description": "Profilo attivo, copiato da financial_config.financial_profile: MAI un valore di ripiego applicato a runtime."
+            },
+            "drivers": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/driver_entry" }
+            },
+            "unbound_required_roles": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 },
+              "description": "Ruoli richiesti dal profilo e non legati. Non esiste valore di ripiego: un ruolo richiesto non legato e' driver_role_unbound, mai un default."
+            }
+          }
+        },
+        "results": {
+          "type": "object",
+          "description": "SEZIONE — calendario, esiti dei moduli e scenari. E' lo snapshot immutabile del calcolo, per costruzione ricalcolabile: non e' una seconda fonte di verita'.",
+          "additionalProperties": false,
+          "required": ["calendar", "modules", "scenarios"],
+          "properties": {
+            "calendar": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["anchor_date", "frequency", "horizon_periods", "periods"],
+              "properties": {
+                "anchor_date": {
+                  "$ref": "#/$defs/iso_date",
+                  "description": "DICHIARATA in financial_config, mai derivata dall'orologio."
+                },
+                "frequency": { "$ref": "#/$defs/calendar_frequency" },
+                "horizon_periods": { "type": "integer", "minimum": 1 },
+                "periods": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["index", "start_date", "end_date", "partial"],
+                    "properties": {
+                      "index": { "$ref": "#/$defs/period_index" },
+                      "start_date": { "$ref": "#/$defs/iso_date" },
+                      "end_date": { "$ref": "#/$defs/iso_date" },
+                      "partial": {
+                        "type": "boolean",
+                        "description": "Un primo periodo parziale e' DICHIARATO con la sua quota: mai un periodo pieno silenzioso."
+                      },
+                      "day_fraction": { "$ref": "#/$defs/amount" }
+                    }
+                  }
+                },
+                "conversions_applied": {
+                  "type": "array",
+                  "description": "Ogni conversione applicata e' registrata con formula e parametri: una conversione che non compare nel report equivale a una non eseguita.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["driver_id", "conversion_policy", "formula"],
+                    "properties": {
+                      "driver_id": { "$ref": "#/$defs/drv_id" },
+                      "conversion_policy": { "$ref": "#/$defs/conversion_policy" },
+                      "formula": { "type": "string", "minLength": 1 },
+                      "from_frequency": { "$ref": "#/$defs/frequency" },
+                      "to_frequency": { "$ref": "#/$defs/calendar_frequency" },
+                      "parameters": {
+                        "type": "object",
+                        "additionalProperties": { "$ref": "#/$defs/amount" }
+                      }
+                    }
+                  }
+                },
+                "out_of_horizon_milestones": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "$ref": "#/$defs/mil_ref" },
+                  "description": "Milestone la cui data cade oltre l'orizzonte: milestone_outside_horizon (WARNING), costo NON nei totali e residuo dichiarato."
+                }
+              }
+            },
+            "modules": {
+              "type": "object",
+              "description": "Esiti dei moduli di calcolo del perimetro attuale. L'insieme e' chiuso: i moduli opzionali (capex, depreciation, working_capital, tax, financing) non sono supportati, e la loro assenza non e' un'omissione silenziosa ma il perimetro dichiarato del piano finanziario.",
+              "additionalProperties": false,
+              "required": [
+                "revenue",
+                "cogs",
+                "gross_margin",
+                "headcount",
+                "payroll",
+                "opex",
+                "pnl",
+                "cash_flow",
+                "balance_sheet",
+                "runway",
+                "cash_buffer",
+                "break_even",
+                "funding_gap",
+                "milestone_coverage",
+                "kpi"
+              ],
+              "properties": {
+                "revenue": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "revenue" } } }
+                  ]
+                },
+                "cogs": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "cogs" } } }
+                  ]
+                },
+                "gross_margin": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "gross_margin" } } }
+                  ]
+                },
+                "headcount": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "headcount" } } }
+                  ]
+                },
+                "payroll": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "payroll" } } }
+                  ]
+                },
+                "opex": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "opex" } } }
+                  ]
+                },
+                "pnl": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "pnl" } } }
+                  ]
+                },
+                "cash_flow": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "cash_flow" } } }
+                  ]
+                },
+                "balance_sheet": {
+                  "allOf": [
+                    { "$ref": "#/$defs/not_applicable_module" },
+                    {
+                      "properties": {
+                        "module_id": { "const": "balance_sheet" },
+                        "decision_ref": { "const": "DEC-S10-23" }
+                      }
+                    }
+                  ],
+                  "description": "OMISSIONE DICHIARATA E VISIBILE. Il modulo balance_sheet non e' calcolato e compare come NOT_APPLICABLE NOMINATO, con motivazione e con il riferimento di decisione fissato dallo schema (decision_ref const). Non e' ammesso ometterlo: un modulo assente da un output si legge come non pertinente, mentre la verita' e' che non e' stato calcolato."
+                },
+                "runway": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "runway" } } }
+                  ],
+                  "description": "runway_to_zero e runway_to_buffer restano DUE grandezze distinte: collassarle e' un difetto, non una semplificazione."
+                },
+                "cash_buffer": {
+                  "allOf": [
+                    { "$ref": "#/$defs/module_result" },
+                    { "properties": { "module_id": { "const": "cash_buffer" } } }
+                  ],
+                  "description": "Policy non dichiarata in financial_config: status NOT_APPLICABLE ESPLICITO, mai uno zero implicito."
+                },
+                "break_even": {
+                  "type": "object",
+                  "description": "Modulo obbligatorio. Un margine unitario non positivo produce NOT_REACHABLE dichiarato; un pareggio oltre l'orizzonte produce NOT_REACHED: mai un'omissione.",
+                  "additionalProperties": false,
+                  "required": ["module_id", "status", "outcome"],
+                  "properties": {
+                    "module_id": { "const": "break_even" },
+                    "status": { "$ref": "#/$defs/module_status" },
+                    "not_applicable_reason": { "type": "string", "minLength": 1 },
+                    "outcome": {
+                      "type": "string",
+                      "enum": ["REACHED", "NOT_REACHED", "NOT_REACHABLE"]
+                    },
+                    "break_even_volume": { "$ref": "#/$defs/amount" },
+                    "break_even_revenue": { "$ref": "#/$defs/amount" },
+                    "first_break_even_period": {
+                      "type": ["integer", "null"],
+                      "minimum": 0
+                    },
+                    "unit_margin": { "$ref": "#/$defs/amount" },
+                    "fixed_costs_per_period": { "$ref": "#/$defs/period_series" },
+                    "input_driver_refs": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": { "$ref": "#/$defs/drv_id" }
+                    }
+                  }
+                },
+                "funding_gap": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["module_id", "status"],
+                  "properties": {
+                    "module_id": { "type": "string", "minLength": 1, "const": "funding_gap" },
+                    "status": { "$ref": "#/$defs/module_status" },
+                    "not_applicable_reason": { "type": "string", "minLength": 1 },
+                    "input_driver_refs": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": { "$ref": "#/$defs/drv_id" }
+                    },
+                    "series": { "$ref": "#/$defs/period_series" },
+                    "lines": {
+                      "type": "array",
+                      "items": { "$ref": "#/$defs/cost_line" }
+                    },
+                    "metrics": {
+                      "type": "object",
+                      "additionalProperties": { "$ref": "#/$defs/amount" }
+                    },
+                    "notes": { "type": "string" },
+                    "use_of_proceeds_candidates": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["category_id", "label", "eligibility_basis"],
+                        "properties": {
+                          "category_id": { "type": "string", "minLength": 1 },
+                          "label": { "type": "string", "minLength": 1 },
+                          "eligibility_basis": { "type": "string", "minLength": 1 },
+                          "driver_refs": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": { "$ref": "#/$defs/drv_id" }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": "funding_gap e' un RESIDUO, mai una fonte (violazione funding_gap_as_source). funding_gap_to_zero e funding_gap_to_buffer restano distinti. Questo slot — e SOLO questo — usa un OGGETTO CHIUSO INLINE che riproduce il contratto richiesto di $defs.module_result e vi aggiunge la SOLA use_of_proceeds_candidates: e' il costrutto che results.modules adotta anche per break_even, milestone_coverage e kpi. Una forma allOf sarebbe INAPPLICABILE: sotto Draft 2020-12 additionalProperties del ramo $ref non vede una proprieta' dichiarata in un ramo fratello, e il documento sarebbe RESPINTO. use_of_proceeds_candidates non dichiara alcun tipo NUMERICO a nessuna profondita': sono CATEGORIE ELEGGIBILI, non un'allocazione — nessun importo e' associato a una categoria, nessuna somma di categorie produce un totale, e la loro somma non e' un ask. L'EQUIVALENZA STRUTTURALE con $defs.module_result e' verificata dai test di integrazione, con queste sole ECCEZIONI dichiarate: description a livello di oggetto, il solo `const` su module_id, il solo membro use_of_proceeds_candidates."
+                },
+                "milestone_coverage": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["module_id", "status"],
+                  "properties": {
+                    "module_id": { "const": "milestone_coverage" },
+                    "status": { "$ref": "#/$defs/module_status" },
+                    "not_applicable_reason": { "type": "string", "minLength": 1 },
+                    "milestones": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": ["milestone_ref", "coverage_status"],
+                        "properties": {
+                          "milestone_ref": { "$ref": "#/$defs/mil_ref" },
+                          "coverage_status": {
+                            "type": "string",
+                            "enum": ["funded", "at_risk", "unfunded"]
+                          },
+                          "cost_driver_refs": {
+                            "type": "array",
+                            "uniqueItems": true,
+                            "items": { "$ref": "#/$defs/drv_id" }
+                          },
+                          "period_index": { "type": ["integer", "null"], "minimum": 0 }
+                        }
+                      }
+                    },
+                    "unmapped_residual": { "$ref": "#/$defs/amount" }
+                  }
+                },
+                "kpi": {
+                  "type": "object",
+                  "description": "Modulo obbligatorio. Il modulo esiste SEMPRE; e' il suo contenuto a ridursi quando i driver mancano. Le otto voci del set minimo sono tutte OBBLIGATORIE: un KPI non calcolabile e' NOT_APPLICABLE con il nome del ruolo mancante, mai omesso.",
+                  "additionalProperties": false,
+                  "required": ["module_id", "status", "indicators"],
+                  "properties": {
+                    "module_id": { "const": "kpi" },
+                    "status": { "$ref": "#/$defs/module_status" },
+                    "indicators": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "gross_margin_pct",
+                        "monthly_burn",
+                        "runway",
+                        "cac",
+                        "ltv",
+                        "ltv_cac_ratio",
+                        "break_even_period",
+                        "milestone_coverage"
+                      ],
+                      "properties": {
+                        "gross_margin_pct": { "$ref": "#/$defs/kpi_indicator" },
+                        "monthly_burn": { "$ref": "#/$defs/kpi_indicator" },
+                        "runway": { "$ref": "#/$defs/kpi_indicator" },
+                        "cac": { "$ref": "#/$defs/kpi_indicator" },
+                        "ltv": { "$ref": "#/$defs/kpi_indicator" },
+                        "ltv_cac_ratio": { "$ref": "#/$defs/kpi_indicator" },
+                        "break_even_period": { "$ref": "#/$defs/kpi_indicator" },
+                        "milestone_coverage": { "$ref": "#/$defs/kpi_indicator" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "scenarios": {
+              "type": "object",
+              "description": "Tre motori indipendenti, non tre etichette. Nessun percorso di esecuzione produce una serie etichettata Downside o Upside senza input differenziati dal Base: tre serie identiche con tre etichette diverse sono un difetto, non una semplificazione.",
+              "additionalProperties": false,
+              "required": ["coverage", "base", "downside", "upside"],
+              "properties": {
+                "coverage": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["level", "ratio", "uncovered_driver_refs"],
+                  "properties": {
+                    "level": {
+                      "type": "string",
+                      "enum": ["full", "partial", "none"],
+                      "description": "Copertura misurata sui SOLI driver richiesti dal profilo attivo."
+                    },
+                    "ratio": { "$ref": "#/$defs/amount" },
+                    "threshold": { "$ref": "#/$defs/amount" },
+                    "uncovered_driver_refs": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": { "$ref": "#/$defs/drv_id" },
+                      "description": "Elenco NOMINATIVO dei driver privi di terna: la copertura parziale non e' mai riassorbita in un PASS."
+                    },
+                    "proposed_condition_ref": { "$ref": "#/$defs/cond_ref" }
+                  }
+                },
+                "base": { "$ref": "#/$defs/scenario_result" },
+                "downside": { "$ref": "#/$defs/scenario_result" },
+                "upside": { "$ref": "#/$defs/scenario_result" }
+              }
+            }
+          }
+        },
+        "reconciliations": {
+          "type": "object",
+          "description": "SEZIONE — contratti di riconciliazione. Sono TUTTI obbligatori e riportati sempre, anche quando passano: un controllo che non compare nel report equivale a un controllo non eseguito. REC-07 e REC-08 sono opzionali e non inclusi; REC-10 non e' implementato e non e' rappresentabile qui.",
+          "additionalProperties": false,
+          "required": [
+            "REC-01",
+            "REC-02",
+            "REC-03",
+            "REC-04",
+            "REC-05",
+            "REC-06",
+            "REC-09",
+            "REC-11",
+            "REC-12",
+            "REC-13",
+            "REC-14",
+            "REC-15"
+          ],
+          "properties": {
+            "REC-01": { "$ref": "#/$defs/reconciliation" },
+            "REC-02": { "$ref": "#/$defs/reconciliation" },
+            "REC-03": { "$ref": "#/$defs/reconciliation" },
+            "REC-04": { "$ref": "#/$defs/reconciliation" },
+            "REC-05": { "$ref": "#/$defs/reconciliation" },
+            "REC-06": { "$ref": "#/$defs/reconciliation" },
+            "REC-09": { "$ref": "#/$defs/reconciliation" },
+            "REC-11": { "$ref": "#/$defs/reconciliation" },
+            "REC-12": { "$ref": "#/$defs/reconciliation" },
+            "REC-13": { "$ref": "#/$defs/reconciliation" },
+            "REC-14": { "$ref": "#/$defs/reconciliation" },
+            "REC-15": { "$ref": "#/$defs/reconciliation" }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "description": "SEZIONE — esiti di validazione del calcolo canonico. La presenza di una formula non e' mai sufficiente per PASS. Gli stati STRUCTURE_PRESENT e RUNTIME_REQUIRED sono strutturalmente esclusi da questa sezione: appartengono al report di QA del workbook, che non e' canonico e non e' descritto da questo schema.",
+          "additionalProperties": false,
+          "required": ["result", "checks", "errors", "warnings"],
+          "properties": {
+            "result": { "type": "string", "enum": ["PASS", "WARNING", "FAIL"] },
+            "checks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["check_id", "status"],
+                "properties": {
+                  "check_id": { "type": "string", "minLength": 1 },
+                  "status": { "$ref": "#/$defs/canonical_check_status" },
+                  "expected": { "$ref": "#/$defs/amount" },
+                  "actual": { "$ref": "#/$defs/amount" },
+                  "residual": { "$ref": "#/$defs/amount" },
+                  "tolerance": { "type": "string", "minLength": 1 },
+                  "affected_refs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1 }
+                  },
+                  "message": { "type": "string" }
+                }
+              }
+            },
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["code", "message"],
+                "properties": {
+                  "code": { "type": "string", "minLength": 1 },
+                  "message": { "type": "string", "minLength": 1 },
+                  "affected_refs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["code", "message"],
+                "properties": {
+                  "code": { "type": "string", "minLength": 1 },
+                  "message": { "type": "string", "minLength": 1 },
+                  "affected_refs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            },
+            "propagated_status": {
+              "$ref": "#/$defs/driver_status",
+              "description": "Stato propagato = MINIMO degli stati degli input, nell'ordine unresolved < placeholder < inferred < confirmed. Un caveat non e' mai riassorbito in un PASS."
+            },
+            "investor_readiness": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "blocking_reasons"],
+              "description": "Portatore della prontezza INVESTOR-READY, che e' la TERZA prontezza e resta DISTINTA dalle altre due: `result` dice che l'aritmetica chiude, `propagated_status` dice DI CHE COSA sono fatti i numeri, e nessuno dei due dice se il piano e' presentabile a un terzo. NESSUN percorso deriva questo campo da validation.result soltanto. La regola e' CONSERVATIVA e dichiarata: status \"ready\" SE E SOLO SE result == PASS AND propagated_status == confirmed AND unbound_required_roles == [] AND scenarios.coverage.level != none AND nessuna reconciliation con severity FAIL e status FAIL AND governance.plan.propagated_status == confirmed. La materialita' NON filtra questa regola.",
+              "properties": {
+                "status": { "type": "string", "enum": ["ready", "not_ready"] },
+                "blocking_reasons": {
+                  "type": "array",
+                  "description": "Ragioni di blocco TIPIZZATE e ATTRIBUITE (codice piu' affected_refs), MAI prosa: sono l'informazione utile, e un booleano le perderebbe. L'attribuzione NON VUOTA e' verificata in modo COMPORTAMENTALE da validate_financial_output.py.",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["code", "message"],
+                    "properties": {
+                      "code": { "type": "string", "minLength": 1 },
+                      "message": { "type": "string", "minLength": 1 },
+                      "affected_refs": {
+                        "type": "array",
+                        "uniqueItems": true,
+                        "items": { "type": "string", "minLength": 1 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "calculation_metadata": {
+          "type": "object",
+          "description": "SEZIONE — metadati di auditabilita' completi. Rendono il ricalcolo verificabile da terzi invece che promesso.",
+          "additionalProperties": false,
+          "required": [
+            "engine_version",
+            "engine_source_hash",
+            "calculation_policy_version",
+            "modules",
+            "output_checksums"
+          ],
+          "properties": {
+            "engine_version": { "type": "string", "minLength": 1 },
+            "engine_source_hash": {
+              "$ref": "#/$defs/sha256",
+              "description": "sha256 del sorgente dei moduli di calcolo: una stringa di versione si dimentica di aggiornare, un hash del sorgente non puo' divergere dal codice."
+            },
+            "calculation_policy_version": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Copiata da financial_config: versiona arrotondamento, tolleranze, politica di conversione e trattamento dei periodi parziali — scelte che cambiano i numeri senza cambiare le formule."
+            },
+            "modules": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["module_id", "module_version", "input_driver_refs"],
+                "properties": {
+                  "module_id": { "type": "string", "minLength": 1 },
+                  "module_version": { "type": "string", "minLength": 1 },
+                  "input_driver_refs": {
+                    "type": "array",
+                    "items": { "$ref": "#/$defs/drv_id" },
+                    "description": "Lista ORDINATA dei DRV-* consumati dal modulo."
+                  },
+                  "formula_semantics": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "Descrizione in prosa della semantica del modulo. Non e' una forma eseguibile: la Formula DSL non viene estesa per esprimerla."
+                  }
+                }
+              }
+            },
+            "output_checksums": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["base"],
+              "properties": {
+                "base": { "$ref": "#/$defs/sha256" },
+                "downside": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+                "upside": { "oneOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] }
+              }
+            },
+            "dependency_graph": {
+              "type": "array",
+              "description": "module -> [DRV-*] -> [module] esplicito: e' cio' che rende l'impact analysis precisa invece che ricalcola tutto.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["module_id", "consumes_driver_refs", "feeds_modules"],
+                "properties": {
+                  "module_id": { "type": "string", "minLength": 1 },
+                  "consumes_driver_refs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "$ref": "#/$defs/drv_id" }
+                  },
+                  "feeds_modules": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "description": "SEZIONE — canonicalizzazione dello STATO PROPAGATO per modulo e per scenario, come PROIEZIONE DI GOVERNANCE CHIUSA di proprieta' di financial_plan: NON campi dentro module_result e scenario_result, che non portano questo stato. La sezione porta STATO e RIFERIMENTI, MAI una quantita': NESSUN tipo numerico compare qui a NESSUNA profondita' — ne' number, ne' integer, ne' un $ref a amount, period_series, period_index o sha256 — ed e' cio' che rende STRUTTURALE, e non solo dichiarativo, il divieto di quantita' in questa sezione. Il presidio strutturale non basta da solo: validate_financial_output.py verifica anche il CASO NEGATIVO in modo comportamentale. La mappa e' FINITA e CHIUSA a ogni livello: un modulo non pertinente o uno scenario non prodotto NON sono OMESSI — porterebbero un'assenza indistinguibile da una dimenticanza — ma NOT_APPLICABLE con not_applicable_reason NOMINATA.",
+          "additionalProperties": false,
+          "required": ["plan", "modules", "scenarios"],
+          "properties": {
+            "plan": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["propagated_status"],
+              "description": "Livello di PIANO. propagated_status COINCIDE per contratto con validation.propagated_status ed e' il MINIMO preso su TUTTI gli input DICHIARATI e CONSUMATI, richiesti E opzionali: l'asse richiesto/opzionale NON e' l'asse della propagazione.",
+              "properties": {
+                "propagated_status": { "$ref": "#/$defs/driver_status" }
+              }
+            },
+            "modules": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "QUINDICI properties ESPLICITE e QUINDICI required: esattamente i quindici module_id che results.modules dichiara gia' required — lo STESSO insieme, VERIFICATO, non un elenco parallelo. Una sola definizione condivisa per la voce, mai quindici copie.",
+              "required": [
+                "revenue",
+                "cogs",
+                "gross_margin",
+                "headcount",
+                "payroll",
+                "opex",
+                "pnl",
+                "cash_flow",
+                "balance_sheet",
+                "runway",
+                "cash_buffer",
+                "break_even",
+                "funding_gap",
+                "milestone_coverage",
+                "kpi"
+              ],
+              "properties": {
+                "revenue": { "$ref": "#/$defs/governance_module_entry" },
+                "cogs": { "$ref": "#/$defs/governance_module_entry" },
+                "gross_margin": { "$ref": "#/$defs/governance_module_entry" },
+                "headcount": { "$ref": "#/$defs/governance_module_entry" },
+                "payroll": { "$ref": "#/$defs/governance_module_entry" },
+                "opex": { "$ref": "#/$defs/governance_module_entry" },
+                "pnl": { "$ref": "#/$defs/governance_module_entry" },
+                "cash_flow": { "$ref": "#/$defs/governance_module_entry" },
+                "balance_sheet": { "$ref": "#/$defs/governance_module_entry" },
+                "runway": { "$ref": "#/$defs/governance_module_entry" },
+                "cash_buffer": { "$ref": "#/$defs/governance_module_entry" },
+                "break_even": { "$ref": "#/$defs/governance_module_entry" },
+                "funding_gap": { "$ref": "#/$defs/governance_module_entry" },
+                "milestone_coverage": { "$ref": "#/$defs/governance_module_entry" },
+                "kpi": { "$ref": "#/$defs/governance_module_entry" }
+              }
+            },
+            "scenarios": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "TRE properties ESPLICITE e TRE required: base, downside, upside — esattamente le TRE chiavi di results.scenarios che sono $ref a scenario_result, cioe' l'enum di $defs.scenario_result.properties.scenario. `coverage` NON E' UNO SCENARIO e NON entra qui, a nessuna profondita' e sotto nessuna forma: e' il blocco di MISURA della copertura, i cui ratio e threshold sono $ref a amount, cioe' NUMERICI, e ammetterlo introdurrebbe tipi numerici in governance — esattamente cio' che questa sezione esclude per costruzione.",
+              "required": ["base", "downside", "upside"],
+              "properties": {
+                "base": { "$ref": "#/$defs/governance_scenario_entry" },
+                "downside": { "$ref": "#/$defs/governance_scenario_entry" },
+                "upside": { "$ref": "#/$defs/governance_scenario_entry" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

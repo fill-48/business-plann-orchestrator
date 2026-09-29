@@ -1,0 +1,60 @@
+# --- Python ---------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# --- Transaction manager and candidate work areas --------------------------
+# Journals, locks and candidates are per-run state, never source.
+**/.working/
+**/shared/.tx/
+*.lock
+
+# --- Test and validation reports (generated) --------------------------------
+tests/reports/
+tests/.reports/
+*.report.json
+functional-test-report.*
+
+# --- Installer backups -------------------------------------------------------
+*.bak-*
+skill-backups/
+
+# --- Business plan projects created while using the skill -------------------
+# Real projects belong in your own working directory, not in this repository.
+# Only the fictional example under examples/ is versioned.
+/projects/
+/output/
+**/output/business-plan.md
+**/10_financial-plan/financial-model.xlsx
+**/10_financial-plan/financial-plan.md
+**/11_funding-request/funding-request.md
+**/12_data-room/data-room-index.md
+*.xlsx
+*.docx
+*.pdf
+
+# --- Secrets and local configuration ----------------------------------------
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+.claude/settings.local.json
+
+# --- OS and editors ---------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.idea/
+.vscode/
+
+# --- Temporary files ----------------------------------------------------------
+*.tmp
+*.temp
+tmp/
+temp/

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "RISK-001",
+    "category": "market",
+    "risk": "Il pricing (50-80€/PV/mese) è validato da un solo interlocutore su 4: rischio di sovrastimare la willingness-to-pay.",
+    "probability": "medium",
+    "impact": "high",
+    "severity": "high",
+    "early_warning_indicator": "Tasso di conversione da demo a cliente pagante inferiore al 10% nel pilota",
+    "mitigation": "Validare il prezzo su un campione più ampio prima del pilota; testare 2 fasce di prezzo",
+    "contingency": "Rivedere il pricing model verso un tier più basso o un modello per-seat invece che per-PV",
+    "owner": "founder",
+    "status": "open"
+  },
+  {
+    "id": "RISK-002",
+    "category": "competitive",
+    "risk": "Un competitor con più risorse potrebbe replicare rapidamente la feature di conformità normativa sulle ore di riposo.",
+    "probability": "low",
+    "impact": "medium",
+    "severity": "medium",
+    "early_warning_indicator": "Ingresso di un player noto nel segmento small-chain italiano",
+    "mitigation": "Costruire switching cost tramite integrazione profonda nel workflow quotidiano del manager, non solo sulla singola feature di compliance",
+    "contingency": "Da definire in Stage 7 (Operations e IP)",
+    "owner": "founder",
+    "status": "open"
+  }
+]

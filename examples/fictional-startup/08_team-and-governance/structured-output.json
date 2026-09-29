@@ -1,0 +1,81 @@
+{
+  "team_governance": {
+    "roles": [
+      {
+        "id": "ROLE-001",
+        "person": "Giulia Rossi (co-founder, CEO)",
+        "responsibilities": [
+          "Onboarding e configurazione dei punti vendita",
+          "Erogazione del servizio e customer success"
+        ],
+        "covers_processes": [
+          "OPS-001",
+          "OPS-004"
+        ],
+        "fte_ref": "ASS-032"
+      },
+      {
+        "id": "ROLE-002",
+        "open_position": "Head of Partnerships",
+        "responsibilities": [
+          "Distribuzione e gestione delle associazioni di categoria"
+        ],
+        "covers_processes": [
+          "OPS-005"
+        ],
+        "fte_ref": "ASS-033"
+      }
+    ],
+    "capability_gaps": [
+      {
+        "gap": "Compliance privacy (DPO) non presidiata internamente",
+        "addressed_by": "advisor: Studio Legale Esempio",
+        "notes": "incarico legale esterno con retainer annuale e clausola di reperibilità per gli adempimenti GDPR"
+      }
+    ],
+    "hiring_plan": [
+      {
+        "role_ref": "ROLE-002",
+        "period": "Y1H2",
+        "cost_driver_ref": "ASS-035"
+      }
+    ],
+    "decision_rights": [
+      {
+        "area": "Prodotto e roadmap",
+        "owner_ref": "ROLE-001"
+      },
+      {
+        "area": "Partnership e canali di distribuzione",
+        "owner_ref": "ROLE-002",
+        "consulted_refs": [
+          "ROLE-001"
+        ]
+      }
+    ],
+    "governance": {
+      "structure": "Srl con due soci fondatori e patto parasociale",
+      "equity_split": [
+        {
+          "holder": "Giulia Rossi",
+          "share": 0.6
+        },
+        {
+          "holder": "Marco Bianchi",
+          "share": 0.4
+        }
+      ],
+      "vesting": "4 anni con cliff a 12 mesi",
+      "incentives": "pool opzioni 10% riservato ai primi assunti chiave"
+    },
+    "advisors": [
+      {
+        "name": "Studio Legale Esempio",
+        "area": "IP e privacy"
+      }
+    ],
+    "risk_refs": [
+      "RISK-001"
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Startup Profile",
+  "description": "Classificazione della startup (reference/architecture.md §7). Vive in shared/startup-profile.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["startup_type", "development_stage", "primary_reader", "funding_type", "time_horizon"],
+  "properties": {
+    "startup_type": {
+      "type": "string",
+      "enum": ["commercial", "saas", "marketplace", "consumer", "foodtech",
+               "industrial", "hardware", "deeptech", "biotech", "medtech",
+               "service", "hybrid"]
+    },
+    "development_stage": {
+      "type": "string",
+      "enum": ["idea", "concept", "mvp", "pilot", "early_revenue", "growth",
+               "preclinical", "clinical", "pre_seed", "seed"]
+    },
+    "primary_reader": {
+      "type": "string",
+      "enum": ["founder_internal", "business_angel", "venture_capital",
+               "corporate_partner", "bank", "public_grant", "incubator", "mixed"]
+    },
+    "funding_type": {
+      "type": "string",
+      "enum": ["equity", "debt", "grant", "bootstrapping", "mixed"]
+    },
+    "time_horizon": {
+      "type": "string",
+      "enum": ["12_months", "24_months", "36_months", "5_years", "custom"]
+    },
+    "secondary_readers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["founder_internal", "business_angel", "venture_capital",
+                 "corporate_partner", "bank", "public_grant", "incubator", "mixed"]
+      }
+    },
+    "sector_notes": { "type": "string" },
+    "dominant_metrics": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Metriche/leve dominanti derivate dal tipo (es. SaaS: MRR, churn, NRR, CAC, LTV)."
+    },
+    "classification_confidence": { "type": "string", "enum": ["low", "medium", "high"] }
+  }
+}

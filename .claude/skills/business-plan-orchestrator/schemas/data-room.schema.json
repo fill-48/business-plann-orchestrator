@@ -1,0 +1,1067 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "data-room.schema.json",
+  "title": "Data Room - manifest canonico dello Stage 12",
+  "description": "Manifest canonico dello Stage 12 `12_data-room` (12_data-room/structured-output.json), scritto SOLO dal transaction manager; chiuso a ogni livello (additionalProperties false). La Data Room e' lo strato di EVIDENZA dell'intero business plan: undici sezioni come partizione LOGICA, chiusa e ordinata, del manifest (nessuna cartella fisica); ogni documento e' indicizzato al proprio path relativo ESISTENTE e mai copiato, spostato o riscritto. Gli identificatori CLM-* sono definiti e allocati SOLTANTO qui, in forma canonica ($defs.clm_id, riusato per $ref); ogni claim registrato e' MATERIALE (materiality const). DR-*, EVD-*, SRC-*, ASS-*, COND-* sono in forma canonica: gli alias non sono mai normalizzati. artifact_type = source-register.source_type + tipi generati; owner = enum di conditions-register; validation_status = enum dello status di evidence-register; evidence_class = le sei classi esatte. Staleness DICHIARATA (staleness_policy): current se 0 <= reference_date - date <= max_age_days, stale se oltre, undated se la data manca, non e' ISO 8601 (YYYY-MM-DD) o e' successiva a reference_date; nessun orologio e' letto. Identita': sha256 del payload data_room privo di identity e generated_at, con ogni documento privo di last_verified_at e generated_at (esclusi per COSTRUZIONE), serializzato a chiavi ordinate, separatori compatti, ensure_ascii. $defs.proposal e' l'ingresso DICHIARATO dell'analista delle evidenze, letto da validate_data_room.py --build e mai dal transaction manager.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "data_room"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "data_room": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "staleness_policy",
+        "generated_at",
+        "sections",
+        "documents",
+        "claims",
+        "evidence_index",
+        "unresolved_evidence_gaps",
+        "stale_evidence",
+        "conflicts",
+        "orphan_evidence",
+        "unsupported_claims",
+        "completeness",
+        "open_items",
+        "identity"
+      ],
+      "properties": {
+        "staleness_policy": {
+          "$ref": "#/$defs/staleness_policy"
+        },
+        "generated_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/section"
+          },
+          "minItems": 11,
+          "maxItems": 11
+        },
+        "documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/document"
+          },
+          "minItems": 1
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/claim"
+          },
+          "minItems": 1
+        },
+        "evidence_index": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence_record"
+          }
+        },
+        "unresolved_evidence_gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence_gap"
+          }
+        },
+        "stale_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evd_id"
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/conflict"
+          }
+        },
+        "orphan_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evd_id"
+          }
+        },
+        "unsupported_claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clm_id"
+          }
+        },
+        "completeness": {
+          "$ref": "#/$defs/completeness"
+        },
+        "open_items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/open_item"
+          }
+        },
+        "identity": {
+          "$ref": "#/$defs/identity"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "dr_id": {
+      "type": "string",
+      "pattern": "^DR-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "clm_id": {
+      "type": "string",
+      "pattern": "^CLM-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "evd_id": {
+      "type": "string",
+      "pattern": "^EVD-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "src_id": {
+      "type": "string",
+      "pattern": "^SRC-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "ass_id": {
+      "type": "string",
+      "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "cond_id": {
+      "type": "string",
+      "pattern": "^COND-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "stage_name": {
+      "type": "string",
+      "pattern": "^[0-9]{2}_[a-z0-9][a-z0-9-]*$"
+    },
+    "section_id": {
+      "type": "string",
+      "enum": [
+        "01_corporate-and-governance",
+        "02_market-and-customer-evidence",
+        "03_product-technology-operations-ip",
+        "04_commercial-and-go-to-market",
+        "05_team-and-organization",
+        "06_roadmap-and-milestones",
+        "07_financial-model-and-plan",
+        "08_funding-request-and-use-of-proceeds",
+        "09_risks-assumptions-and-open-items",
+        "10_source-evidence-and-provenance",
+        "11_generated-artifact-metadata"
+      ]
+    },
+    "iso_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "timestamp": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:T[0-9]{2}:[0-9]{2}(?::[0-9]{2})?(?:Z|[+-][0-9]{2}:[0-9]{2})?)?$"
+    },
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "verified_fact",
+        "internal_evidence",
+        "external_source",
+        "founder_assumption",
+        "model_estimate",
+        "missing_information"
+      ]
+    },
+    "link_status": {
+      "type": "string",
+      "enum": [
+        "supporting",
+        "contradicting",
+        "partial",
+        "missing"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "enum": [
+        "founder",
+        "external",
+        "orchestrator"
+      ]
+    },
+    "validation_status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "validated",
+        "rejected",
+        "needs_info"
+      ]
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section",
+        "paragraph_anchor"
+      ],
+      "properties": {
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9]{2}_[a-z0-9][a-z0-9-]*$"
+        },
+        "paragraph_anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_id",
+        "section_id",
+        "title",
+        "artifact_type",
+        "origin",
+        "path",
+        "checksum",
+        "version",
+        "owner",
+        "confidentiality",
+        "related_claims",
+        "related_section",
+        "validation_status",
+        "availability",
+        "source_ref",
+        "evidence_quality",
+        "evidence_refs",
+        "derived_from",
+        "last_verified_at",
+        "generated_at"
+      ],
+      "properties": {
+        "document_id": {
+          "$ref": "#/$defs/dr_id"
+        },
+        "section_id": {
+          "$ref": "#/$defs/section_id"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_type": {
+          "type": "string",
+          "enum": [
+            "official",
+            "industry_report",
+            "academic",
+            "news",
+            "company",
+            "interview",
+            "internal",
+            "estimate",
+            "other",
+            "stage_canonical_output",
+            "stage_handoff",
+            "derived_chapter",
+            "derived_workbook",
+            "derived_funding_request",
+            "shared_register"
+          ]
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "source",
+            "generated"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checksum": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner": {
+          "$ref": "#/$defs/owner"
+        },
+        "confidentiality": {
+          "const": "NOT_SUPPORTED"
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clm_id"
+          }
+        },
+        "related_section": {
+          "$ref": "#/$defs/stage_name"
+        },
+        "validation_status": {
+          "$ref": "#/$defs/validation_status"
+        },
+        "availability": {
+          "type": "string",
+          "enum": [
+            "available",
+            "expected",
+            "missing"
+          ]
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^SRC-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "evidence_quality": {
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            null
+          ]
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evd_id"
+          }
+        },
+        "derived_from": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dr_id"
+          }
+        },
+        "last_verified_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "generated_at": {
+          "$ref": "#/$defs/timestamp"
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "section_id",
+        "ordinal",
+        "title",
+        "status",
+        "reason",
+        "document_ids"
+      ],
+      "properties": {
+        "section_id": {
+          "$ref": "#/$defs/section_id"
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 11
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "POPULATED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "document_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dr_id"
+          }
+        }
+      }
+    },
+    "evidence_link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "document_id",
+        "status",
+        "evidence_class"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^EVD-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "document_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^DR-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "status": {
+          "$ref": "#/$defs/link_status"
+        },
+        "evidence_class": {
+          "$ref": "#/$defs/evidence_class"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "statement",
+        "related_section",
+        "provenance",
+        "assumption_refs",
+        "evidence_links",
+        "materiality",
+        "support_status"
+      ],
+      "properties": {
+        "claim_id": {
+          "$ref": "#/$defs/clm_id"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "related_section": {
+          "$ref": "#/$defs/stage_name"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "assumption_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ass_id"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence_link"
+          }
+        },
+        "materiality": {
+          "const": "material"
+        },
+        "support_status": {
+          "type": "string",
+          "enum": [
+            "supported",
+            "unsupported",
+            "contested"
+          ]
+        }
+      }
+    },
+    "evidence_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_ref",
+        "classification",
+        "register_status",
+        "date",
+        "freshness",
+        "verification",
+        "linked_claims",
+        "linked_documents",
+        "orphan"
+      ],
+      "properties": {
+        "evidence_ref": {
+          "$ref": "#/$defs/evd_id"
+        },
+        "classification": {
+          "$ref": "#/$defs/evidence_class"
+        },
+        "register_status": {
+          "$ref": "#/$defs/validation_status"
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "freshness": {
+          "type": "string",
+          "enum": [
+            "current",
+            "stale",
+            "undated"
+          ]
+        },
+        "verification": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "unverified"
+          ]
+        },
+        "linked_claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clm_id"
+          }
+        },
+        "linked_documents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dr_id"
+          }
+        },
+        "orphan": {
+          "type": "boolean"
+        }
+      }
+    },
+    "evidence_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "ref",
+        "detail"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "claim_unsupported",
+            "missing_link",
+            "assumption_without_evidence_refs",
+            "missing_information"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "pattern": "^(?:CLM|ASS|EVD)-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issue_id",
+        "kind",
+        "claim_id",
+        "evidence_a",
+        "evidence_b",
+        "severity",
+        "decision_required",
+        "files"
+      ],
+      "properties": {
+        "issue_id": {
+          "type": "string",
+          "pattern": "^ISSUE-DR-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "contradiction",
+            "duplicate"
+          ]
+        },
+        "claim_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^CLM-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        },
+        "evidence_a": {
+          "$ref": "#/$defs/evd_id"
+        },
+        "evidence_b": {
+          "$ref": "#/$defs/evd_id"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "Critical",
+            "High",
+            "Medium",
+            "Low"
+          ]
+        },
+        "decision_required": {
+          "type": "string",
+          "minLength": 1
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denominator",
+        "claims_total",
+        "claims_supported",
+        "coverage_percent",
+        "class_distribution"
+      ],
+      "properties": {
+        "denominator": {
+          "const": "registered_claims"
+        },
+        "claims_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "claims_supported": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "coverage_percent": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[0-9]{1,3}\\.[0-9]{2}$"
+        },
+        "class_distribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "verified_fact",
+            "internal_evidence",
+            "external_source",
+            "founder_assumption",
+            "model_estimate",
+            "missing_information"
+          ],
+          "properties": {
+            "verified_fact": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "internal_evidence": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "external_source": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "founder_assumption": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "model_estimate": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "missing_information": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "open_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "item_ref",
+        "origin",
+        "status",
+        "proof_ref"
+      ],
+      "properties": {
+        "item_ref": {
+          "$ref": "#/$defs/cond_id"
+        },
+        "origin": {
+          "const": "shared/conditions-register.json"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "APERTO",
+            "CHIUSO"
+          ]
+        },
+        "proof_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^DEC-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "excluded_fields",
+        "payload_sha256"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "excluded_fields": {
+          "const": [
+            "generated_at",
+            "last_verified_at"
+          ]
+        },
+        "payload_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "staleness_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterion",
+        "reference_date",
+        "max_age_days"
+      ],
+      "properties": {
+        "criterion": {
+          "const": "evidence_register_date_age_days"
+        },
+        "reference_date": {
+          "$ref": "#/$defs/iso_date"
+        },
+        "max_age_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "as_of",
+        "max_age_days",
+        "claims"
+      ],
+      "properties": {
+        "as_of": {
+          "$ref": "#/$defs/iso_date"
+        },
+        "max_age_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3650
+        },
+        "generated_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "section_reasons": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [],
+          "properties": {
+            "01_corporate-and-governance": {
+              "type": "string",
+              "minLength": 1
+            },
+            "02_market-and-customer-evidence": {
+              "type": "string",
+              "minLength": 1
+            },
+            "03_product-technology-operations-ip": {
+              "type": "string",
+              "minLength": 1
+            },
+            "04_commercial-and-go-to-market": {
+              "type": "string",
+              "minLength": 1
+            },
+            "05_team-and-organization": {
+              "type": "string",
+              "minLength": 1
+            },
+            "06_roadmap-and-milestones": {
+              "type": "string",
+              "minLength": 1
+            },
+            "07_financial-model-and-plan": {
+              "type": "string",
+              "minLength": 1
+            },
+            "08_funding-request-and-use-of-proceeds": {
+              "type": "string",
+              "minLength": 1
+            },
+            "09_risks-assumptions-and-open-items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "10_source-evidence-and-provenance": {
+              "type": "string",
+              "minLength": 1
+            },
+            "11_generated-artifact-metadata": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "title",
+              "artifact_type",
+              "section_id",
+              "related_section",
+              "owner",
+              "validation_status"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_type": {
+                "type": "string",
+                "enum": [
+                  "official",
+                  "industry_report",
+                  "academic",
+                  "news",
+                  "company",
+                  "interview",
+                  "internal",
+                  "estimate",
+                  "other"
+                ]
+              },
+              "section_id": {
+                "$ref": "#/$defs/section_id"
+              },
+              "related_section": {
+                "$ref": "#/$defs/stage_name"
+              },
+              "owner": {
+                "$ref": "#/$defs/owner"
+              },
+              "validation_status": {
+                "$ref": "#/$defs/validation_status"
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^SRC-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+              },
+              "evidence_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/evd_id"
+                }
+              },
+              "last_verified_at": {
+                "$ref": "#/$defs/timestamp"
+              }
+            }
+          }
+        },
+        "expected": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "title",
+              "artifact_type",
+              "section_id",
+              "related_section",
+              "owner",
+              "validation_status"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_type": {
+                "type": "string",
+                "enum": [
+                  "official",
+                  "industry_report",
+                  "academic",
+                  "news",
+                  "company",
+                  "interview",
+                  "internal",
+                  "estimate",
+                  "other"
+                ]
+              },
+              "section_id": {
+                "$ref": "#/$defs/section_id"
+              },
+              "related_section": {
+                "$ref": "#/$defs/stage_name"
+              },
+              "owner": {
+                "$ref": "#/$defs/owner"
+              },
+              "validation_status": {
+                "$ref": "#/$defs/validation_status"
+              }
+            }
+          }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "key",
+              "statement",
+              "related_section",
+              "provenance",
+              "assumption_refs",
+              "evidence_links"
+            ],
+            "properties": {
+              "key": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$"
+              },
+              "statement": {
+                "type": "string",
+                "minLength": 1
+              },
+              "related_section": {
+                "$ref": "#/$defs/stage_name"
+              },
+              "provenance": {
+                "$ref": "#/$defs/provenance"
+              },
+              "assumption_refs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ass_id"
+                }
+              },
+              "evidence_links": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "evidence_ref",
+                    "document_path",
+                    "status"
+                  ],
+                  "properties": {
+                    "evidence_ref": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "pattern": "^EVD-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+                    },
+                    "document_path": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "minLength": 1
+                    },
+                    "status": {
+                      "$ref": "#/$defs/link_status"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

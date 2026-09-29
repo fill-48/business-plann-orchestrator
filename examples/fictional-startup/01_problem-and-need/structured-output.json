@@ -1,0 +1,28 @@
+{
+  "problem_statement": {
+    "type": "cost",
+    "description": "La pianificazione turni multi-punto-vendita è manuale (Excel + WhatsApp): errori di copertura e ore perse dai manager ogni settimana",
+    "affected_roles": [
+      "store manager",
+      "titolare catena"
+    ],
+    "frequency": "weekly",
+    "intensity": "high",
+    "perceived_vs_demonstrated": "perceived_and_demonstrated",
+    "time_lost_ref": "ASS-002",
+    "alternatives": [
+      {
+        "name": "Excel + WhatsApp (status quo)",
+        "why_insufficient": "3-4 ore/settimana del manager, errori di copertura (EVD-001, EVD-003)"
+      },
+      {
+        "name": "software workforce management enterprise",
+        "why_insufficient": "costi e complessità fuori scala per catene 3-20 PV"
+      }
+    ],
+    "evidence_refs": [
+      "EVD-001",
+      "EVD-003"
+    ]
+  }
+}

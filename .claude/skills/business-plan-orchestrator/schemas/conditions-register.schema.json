@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Conditions Register",
+  "description": "Condizioni aperte da gate approved_with_conditions. Vive in shared/conditions-register.json. Il confronto due_before_stage avviene per ordinale di stage, mai lessicografico.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "stage",
+      "description",
+      "severity",
+      "owner",
+      "validation_action",
+      "due_before_stage",
+      "resolution_status"
+    ],
+    "properties": {
+      "id": { "type": "string", "pattern": "^COND-[0-9]{3,}$" },
+      "stage": { "type": "string", "pattern": "^[0-9]{2}_[a-z0-9][a-z0-9-]*$" },
+      "description": { "type": "string", "minLength": 1 },
+      "severity": { "type": "string", "enum": ["high", "medium", "low"] },
+      "owner": {
+        "type": "string",
+        "enum": ["founder", "external", "orchestrator"]
+      },
+      "validation_action": { "type": "string", "minLength": 1 },
+      "due_before_stage": {
+        "type": "string",
+        "pattern": "^[0-9]{2}_[a-z0-9][a-z0-9-]*$"
+      },
+      "resolution_status": {
+        "type": "string",
+        "enum": ["open", "resolved", "waived"]
+      },
+      "resolved_by": {
+        "type": ["string", "null"],
+        "pattern": "^DEC-[0-9]{3,}$"
+      },
+      "evidence_ref": {
+        "type": ["string", "null"],
+        "pattern": "^EVD-[0-9]{3,}$"
+      },
+      "created_at": { "type": "string" },
+      "last_updated": { "type": "string" }
+    }
+  }
+}

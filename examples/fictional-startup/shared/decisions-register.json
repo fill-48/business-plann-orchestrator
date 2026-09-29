@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "initialized_from": {
+    "source": "shared/decision-log.md",
+    "source_sha256": "bca3145b2d585b4392244daf90b6d07456c4efed13f2ae6d2ee13533ea6e1abf",
+    "derived_floor": 2,
+    "initialized_at": "2026-07-24T06:31:12.764516+00:00",
+    "operation_id": "op-demo-churn"
+  },
+  "decisions": [
+    {
+      "id": "DEC-003",
+      "operation_id": "op-demo-churn",
+      "request_payload_hash": "60077e79cb0a145b682fcac6bc595b8c9696effc5e9bbe230a01ee290b60b535",
+      "decision_type": "assumption_update",
+      "target_refs": [
+        "ASS-027"
+      ],
+      "motivation": "evidenza pilota su retention",
+      "approver": "founder",
+      "created_at": "2026-07-24T06:31:12.767488+00:00",
+      "options_considered": "mantenere 0.18 vs rivedere a 0.16",
+      "impact": "nessun derivato dipende dal churn; SOM invariato"
+    }
+  ]
+}

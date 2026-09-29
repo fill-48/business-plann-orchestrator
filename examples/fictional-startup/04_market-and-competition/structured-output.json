@@ -1,0 +1,63 @@
+{
+  "market_model": {
+    "tam_ref": "ASS-010",
+    "sam_ref": "ASS-012",
+    "som_ref": "ASS-014",
+    "geography": "IT",
+    "period": "Y1"
+  },
+  "competitive_landscape": {
+    "categories": {
+      "direct": {
+        "competitors": [
+          {
+            "id": "CMP-001",
+            "name": "Suite workforce management enterprise",
+            "assessment": "complete ma costose e lente da adottare: perdono sulle catene 3-20 PV per prezzo e onboarding"
+          }
+        ]
+      },
+      "indirect": {
+        "competitors": [
+          {
+            "id": "CMP-002",
+            "name": "Gestionali HR/paghe con modulo turni",
+            "assessment": "il modulo turni è secondario: UX debole per lo store manager, nessun multi-PV nativo"
+          }
+        ]
+      },
+      "substitutes": {
+        "competitors": [
+          {
+            "id": "CMP-003",
+            "name": "Consulenti paghe che preparano i turni",
+            "assessment": "esternalizzano il lavoro ma non il problema: latenza e costo per modifica"
+          }
+        ]
+      },
+      "internal": {
+        "competitors": [
+          {
+            "id": "CMP-004",
+            "name": "Fogli Excel costruiti in casa",
+            "assessment": "gratis ma fragili: nessun controllo di copertura, conoscenza nella testa di una persona"
+          }
+        ]
+      },
+      "status_quo": {
+        "competitors": [
+          {
+            "id": "CMP-005",
+            "name": "Excel + WhatsApp (processo attuale)",
+            "assessment": "lo standard di fatto del segmento: il vero concorrente da spodestare (EVD-001)"
+          }
+        ]
+      },
+      "non_consumption": {
+        "result": "none_identified",
+        "research_notes": "interviste EVD-001/EVD-003 e osservazione dei processi delle 4 catene contattate",
+        "rationale": "nessuna catena 3+ PV può non pianificare i turni: il non-consumo non è un'opzione reale"
+      }
+    }
+  }
+}

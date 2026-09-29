@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "protocol": "persistence-conflict-protocol",
+  "version": "0.1.0",
+  "official_source": "shared/assumptions-register.json",
+  "identity_rule": "One business variable maps to one ASS id. A conflicting value reuses the existing ASS id after confirmation; it never creates a second ASS for the same variable.",
+  "turn_rule": "A proposed replacement and its valid confirmation must come from two separate user turns. The turn that proposes the new value cannot also authorize the write.",
+  "raw_idea_rule": "00_idea-discovery/raw-idea.md is verbatim history and is never rewritten retroactively.",
+  "states": {
+    "NO_CONFLICT": {
+      "meaning": "No persisted official value exists for the variable, or the proposed value matches the persisted value.",
+      "allowed_persistent_actions": [
+        "create_new_assumption_for_unpersisted_variable",
+        "reuse_existing_assumption_id_for_same_value",
+        "write_value_to_relevant_stage_files"
+      ],
+      "required_response": [
+        "show_visible_persistence_check",
+        "state_no_conflict_or_first_persistence"
+      ]
+    },
+    "CONFLICT_DETECTED_AWAITING_CONFIRMATION": {
+      "meaning": "A persisted official value exists and the user proposed a different value.",
+      "same_turn_confirmation_allowed": false,
+      "pending_state_storage": "conversation_only",
+      "forbidden_persistent_actions": [
+        "update_official_value",
+        "write_new_value_to_project_files",
+        "append_final_decision_log",
+        "propagate_new_value"
+      ],
+      "required_response": [
+        "show_INCOERENZA_RILEVATA",
+        "show_current_persisted_value",
+        "show_new_proposed_value",
+        "show_assumption_or_entity_id",
+        "show_expected_consequences",
+        "request_explicit_confirmation_in_next_user_turn"
+      ],
+      "confirmation_prompt": "Rispondi in un turno successivo con una conferma esplicita, ad esempio: 'Confermo esplicitamente la sostituzione di <variabile> da <vecchio valore> a <nuovo valore>'. Qualunque risposta ambigua lascia invariato il valore persistito."
+    },
+    "CHANGE_CONFIRMED": {
+      "meaning": "The user confirmed the exact replacement in a later turn.",
+      "confirmation_must_reference": [
+        "same_variable",
+        "old_value",
+        "new_value"
+      ],
+      "allowed_persistent_actions": [
+        "preserve_previous_value_in_assumption_history",
+        "update_existing_assumption_value",
+        "append_decision_log_entry",
+        "propagate_new_value_once_to_relevant_files"
+      ],
+      "forbidden_persistent_actions": [
+        "rewrite_raw_idea",
+        "create_duplicate_assumption_for_same_variable"
+      ]
+    },
+    "CHANGE_REJECTED_OR_UNCONFIRMED": {
+      "meaning": "The user rejected the change or answered ambiguously.",
+      "allowed_persistent_actions": [
+        "leave_existing_value_unchanged"
+      ],
+      "forbidden_persistent_actions": [
+        "update_official_value",
+        "write_new_value_to_project_files",
+        "append_final_decision_log",
+        "propagate_new_value"
+      ],
+      "next_state": "CONFLICT_DETECTED_AWAITING_CONFIRMATION_OR_CLOSED_WITHOUT_CHANGE"
+    }
+  },
+  "classification": {
+    "value_mentioned_but_unpersisted": "NO_CONFLICT",
+    "persisted_official_value_same_as_new_value": "NO_CONFLICT",
+    "non_conflicting_clarification": "NO_CONFLICT",
+    "replacement_of_persisted_official_value": "CONFLICT_DETECTED_AWAITING_CONFIRMATION"
+  },
+  "decision_log_rule": "Only CHANGE_CONFIRMED writes a final DEC entry for the replacement. CONFLICT_DETECTED_AWAITING_CONFIRMATION and CHANGE_REJECTED_OR_UNCONFIRMED do not append a final decision.",
+  "history_rule": "On CHANGE_CONFIRMED, preserve the prior official value in the same ASS entry before updating the current value."
+}

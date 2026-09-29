@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evidence Register",
+  "description": "Classificazione di ogni affermazione rilevante (reference/architecture.md §3.1, §12.3). Vive in shared/evidence-register.json.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "statement", "classification", "status"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^EVD-[0-9]{3,}$" },
+      "statement": { "type": "string" },
+      "classification": {
+        "type": "string",
+        "enum": ["verified_fact", "internal_evidence", "external_source",
+                 "founder_assumption", "model_estimate", "missing_information"]
+      },
+      "evidence_type": { "type": "string" },
+      "source": { "type": "string" },
+      "date": { "type": "string" },
+      "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
+      "relevance": { "type": "string", "enum": ["low", "medium", "high"] },
+      "affected_assumptions": { "type": "array", "items": { "type": "string", "pattern": "^ASS-[0-9]{3,}$" } },
+      "affected_sections": { "type": "array", "items": { "type": "string" } },
+      "validation_action": { "type": "string" },
+      "status": {
+        "type": "string",
+        "enum": ["open", "validated", "rejected", "needs_info"]
+      }
+    }
+  }
+}

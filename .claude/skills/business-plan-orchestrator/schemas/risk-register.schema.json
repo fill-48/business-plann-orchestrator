@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Risk Register",
+  "description": "Rischi e mitigazioni (reference/architecture.md §12.5). Vive in shared/risk-register.json.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "risk", "severity", "status"],
+    "properties": {
+      "id": { "type": "string", "pattern": "^RISK-[0-9]{3,}$" },
+      "category": {
+        "type": "string",
+        "enum": ["market", "technical", "financial", "operational", "regulatory",
+                 "team", "legal", "ip", "competitive", "other"]
+      },
+      "risk": { "type": "string" },
+      "probability": { "type": "string", "enum": ["low", "medium", "high"] },
+      "impact": { "type": "string", "enum": ["low", "medium", "high"] },
+      "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+      "early_warning_indicator": { "type": "string" },
+      "mitigation": { "type": "string" },
+      "contingency": { "type": "string" },
+      "owner": { "type": "string" },
+      "status": { "type": "string", "enum": ["open", "mitigated", "accepted", "closed"] }
+    }
+  }
+}

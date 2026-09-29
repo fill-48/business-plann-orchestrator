@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Milestone Plan (Stage 9)",
+  "description": "Structured output dello Stage 9 09_roadmap-and-milestones. Le definizioni MIL-* vivono solo qui; depends_on[] ammette forward reference dentro lo stesso array, perché refint risolve dopo la raccolta completa. Le date sono stringhe ISO-8601 ordinabili: nessuna aritmetica di date nella Formula DSL. financial_plan_inputs è l'interfaccia contrattuale verso lo Stage 10: sole referenze ASS-*, nessun calcolo e nessuna proiezione.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["milestone_plan"],
+  "$defs": {
+    "mil_id": {
+      "type": "string",
+      "pattern": "^MIL-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Id MIL-* in forma canonica."
+    },
+    "role_ref": {
+      "type": "string",
+      "pattern": "^ROLE-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "ass_ref": {
+      "type": "string",
+      "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "risk_ref": {
+      "type": "string",
+      "pattern": "^RISK-[0-9]{3,}$"
+    },
+    "iso_date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    }
+  },
+  "properties": {
+    "milestone_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["milestones", "financial_plan_inputs"],
+      "properties": {
+        "milestones": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title",
+              "category",
+              "owner_ref",
+              "depends_on",
+              "start_date",
+              "target_date",
+              "cost_ref",
+              "success_criteria",
+              "go_no_go_rule",
+              "exit_criteria",
+              "risk_refs"
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/mil_id" },
+              "title": { "type": "string", "minLength": 1 },
+              "objective": { "type": "string" },
+              "category": {
+                "type": "string",
+                "enum": [
+                  "technical",
+                  "commercial",
+                  "operational",
+                  "organizational"
+                ]
+              },
+              "owner_ref": {
+                "$ref": "#/$defs/role_ref",
+                "description": "Owner = un ROLE-* dello Stage 8: mai una milestone senza owner."
+              },
+              "depends_on": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/mil_id" },
+                "description": "Dipendenze del DAG; l'aciclicità è verificata da validate_milestone_chain, non dallo schema."
+              },
+              "start_date": { "$ref": "#/$defs/iso_date" },
+              "target_date": { "$ref": "#/$defs/iso_date" },
+              "cost_ref": {
+                "$ref": "#/$defs/ass_ref",
+                "description": "Costo della milestone come driver ASS- (model_estimate), mai un valore inline."
+              },
+              "success_criteria": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "go_no_go_rule": { "type": "string", "minLength": 1 },
+              "exit_criteria": { "type": "string", "minLength": 1 },
+              "risk_refs": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/risk_ref" }
+              },
+              "mitigations": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "status": {
+                "type": "string",
+                "enum": ["planned", "in_progress", "done", "cancelled"]
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "financial_plan_inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Interfaccia contrattuale verso lo Stage 10: solo referenze ASS-* canoniche. Nessun valore duplicato, nessun calcolo, nessuna proiezione.",
+          "required": [
+            "pricing_ref",
+            "cogs_refs",
+            "funnel_customers_ref",
+            "churn_ref",
+            "ops_capacity_ref",
+            "headcount_driver_refs",
+            "milestone_cost_refs",
+            "som_ref"
+          ],
+          "properties": {
+            "pricing_ref": { "$ref": "#/$defs/ass_ref" },
+            "cogs_refs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ass_ref" }
+            },
+            "funnel_customers_ref": { "$ref": "#/$defs/ass_ref" },
+            "churn_ref": { "$ref": "#/$defs/ass_ref" },
+            "ops_capacity_ref": { "$ref": "#/$defs/ass_ref" },
+            "headcount_driver_refs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ass_ref" }
+            },
+            "milestone_cost_refs": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/ass_ref" }
+            },
+            "som_ref": { "$ref": "#/$defs/ass_ref" }
+          }
+        }
+      }
+    }
+  }
+}

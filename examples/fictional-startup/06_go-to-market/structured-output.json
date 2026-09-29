@@ -1,0 +1,21 @@
+{
+  "sales_funnel": {
+    "leads_ref": "ASS-021",
+    "stages": [
+      {
+        "name": "lead_to_demo",
+        "rate_ref": "ASS-022"
+      },
+      {
+        "name": "demo_to_close",
+        "rate_ref": "ASS-023"
+      }
+    ],
+    "customers_out_ref": "ASS-024",
+    "spend_ref": "ASS-025",
+    "cac_ref": "ASS-026",
+    "churn_ref": "ASS-027",
+    "capacity_revenue_ref": "ASS-028",
+    "pricing_ref": "ASS-015"
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "description": "Configurazione comune di enforcement. L'ordinamento degli stage e' per indice ordinale esplicito (stage_order), mai lessicografico. release_boundary e' l'ultimo stage implementato, 13_document-generation, che e' anche l'ultimo stage di stage_order: ogni tentativo operativo oltre quel confine e' respinto dal transaction manager con stage_not_implemented, e l'advance-stage dello Stage 13 porta il progetto allo stato terminale del piano invece che a uno stage successivo. La matrice validators dichiara per ogni validator gli stage, le fasi e la versione in cui e' stato introdotto; validate_referential_integrity non ha la fase impact.",
+  "release_boundary": "13_document-generation",
+  "stage_order": {
+    "00_idea-discovery": 0,
+    "01_problem-and-need": 1,
+    "02_customer-segmentation": 2,
+    "03_value-proposition": 3,
+    "04_market-and-competition": 4,
+    "05_business-model": 5,
+    "06_go-to-market": 6,
+    "07_operations-and-ip": 7,
+    "08_team-and-governance": 8,
+    "09_roadmap-and-milestones": 9,
+    "10_financial-plan": 10,
+    "11_funding-request": 11,
+    "12_data-room": 12,
+    "13_document-generation": 13
+  },
+  "gate_states": [
+    "in_progress",
+    "conflict_awaiting_confirmation",
+    "needs_revision",
+    "blocked",
+    "approved_with_conditions",
+    "approved"
+  ],
+  "approved_states": ["approved", "approved_with_conditions"],
+  "validators": {
+    "validate_stage_gate": {
+      "stages": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "phases": ["ingress", "egress"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_referential_integrity": {
+      "stages": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      "phases": ["candidate", "egress"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_market_arithmetic": {
+      "stages": [4, 5, 6],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_unit_economics": {
+      "stages": [5, 6],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_funnel_arithmetic": {
+      "stages": [6],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_cross_stage_consistency": {
+      "stages": [5, 6, 7, 8, 9],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.2.0"
+    },
+    "validate_operations_feasibility": {
+      "stages": [7, 8, 9],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.3.0"
+    },
+    "validate_team_and_governance": {
+      "stages": [8, 9],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.3.0"
+    },
+    "validate_milestone_chain": {
+      "stages": [9],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.3.0"
+    },
+    "validate_financial_binding": {
+      "stages": [10],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.4.0"
+    },
+    "validate_financial_engine": {
+      "stages": [10],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.4.0"
+    },
+    "validate_financial_reconciliation": {
+      "stages": [10],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.4.0"
+    },
+    "validate_financial_output": {
+      "stages": [10],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.4.0"
+    },
+    "validate_funding_request": {
+      "stages": [11],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.5.0"
+    },
+    "validate_data_room": {
+      "stages": [12],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.6.0"
+    },
+    "validate_document_generation": {
+      "stages": [13],
+      "phases": ["egress", "impact"],
+      "introduced_in": "0.7.0"
+    }
+  },
+  "stage10_declaration_note": "Lo Stage 10 dichiara quattro voci validator con stages [10] e phases [egress, impact]. validate_financial_binding, validate_financial_engine e validate_financial_reconciliation sono validator della pipeline interna del piano finanziario e consumano payload intermedi (binding-input.json, engine-input.json); validate_financial_output valida la forma del documento canonico (radice con schema_version, sezione governance, use_of_proceeds_candidates), che il motore non verifica perche' valida il payload intermedio solo sulle sezioni di propria competenza.",
+  "egress_required_note": "egress_required elenca, nell'ordine, i validator che il transaction manager esegue obbligatoriamente all'egress. Il contratto e' vincolante: run_egress_validators solleva ValidatorUsageError e il contract test del framework fallisce se un nome elencato non ha implementazione — nessuno stub eseguibile e' ammesso. Dello Stage 10 vi entra solo validate_financial_output, perche' il documento canonico e' l'unico artefatto presente al confine di egress: gli altri tre validator dello Stage 10 consumano payload intermedi che il candidate del transaction manager non produce. validate_funding_request, validate_data_room e validate_document_generation sono invocabili con l'argv reale del transaction manager (egress --project --candidate --stage --phase egress; impact --project --stage --phase impact) senza ingressi privati obbligatori: --manifest-input di validate_data_room e' opzionale, e --build e --publish di validate_document_generation sono modalita' del solo workflow, mai del transaction manager.",
+  "egress_required": [
+    "validate_stage_gate",
+    "validate_referential_integrity",
+    "validate_market_arithmetic",
+    "validate_unit_economics",
+    "validate_funnel_arithmetic",
+    "validate_cross_stage_consistency",
+    "validate_operations_feasibility",
+    "validate_team_and_governance",
+    "validate_milestone_chain",
+    "validate_financial_output",
+    "validate_funding_request",
+    "validate_data_room",
+    "validate_document_generation"
+  ],
+  "decimals": { "EUR": 2, "ratio": 6, "count": 0 },
+  "tolerances": { "EUR": "0.01", "ratio": "1e-6", "count": "0" }
+}

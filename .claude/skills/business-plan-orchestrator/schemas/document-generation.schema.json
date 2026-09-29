@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "document-generation.schema.json",
+  "title": "Document Generation (Stage 13)",
+  "description": "Canonico dello Stage 13 13_document-generation. E' il MODELLO STRUTTURATO del business plan finale: diciassette capitoli a id, titoli e ordinali costanti, blocchi gia' risolti con la propria provenienza, letterali legati BND-* copiati verbatim da foglie canoniche, ingressi con impronta e corrispondenza con la Data Room, controlli XS-01...XS-12, disclosure obbligatorie, resa e identita'. Scritto SOLO dal Transaction Manager; output/business-plan.md ne e' la resa Markdown derivata. Chiuso a ogni livello. $defs.proposal e' la proposta del runtime-agent business-plan-writer, che SELEZIONA e non scrive. Nessun campo temporale volatile: la data e' as_of, DICHIARATA; identity esclude per costruzione il solo rendering.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "document_generation"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "document_generation": { "$ref": "#/$defs/document_generation" }
+  },
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "nullable_text": { "type": ["string", "null"] },
+    "iso_date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "bnd_id": { "type": "string", "pattern": "^BND-(?:[0-9]{3}|[1-9][0-9]{3,})$" },
+    "mil_id": { "type": "string", "pattern": "^MIL-(?:[0-9]{3}|[1-9][0-9]{3,})$" },
+    "claim_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Riferimento CITATO a un claim della Data Room: lo spazio di nomi dei claim e' dello Stage 12 e lo Stage 13 non lo definisce ne' lo alloca. Forma canonica ed esistenza sono verificate per RISOLUZIONE contro il canonico dello Stage 12 (docgen_highlight_invalid, docgen_reference_unresolved)."
+    },
+    "proposal": {
+      "description": "La proposta del writer in 13_document-generation/.working/<tx>/document-proposal.json: data dichiarata, etichetta di versione PRIVA di cifre, e al piu' cinque milestone e cinque claim in evidenza. Senza highlights la selezione e' quella di default.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as_of", "version_label"],
+      "properties": {
+        "as_of": { "$ref": "#/$defs/iso_date" },
+        "version_label": { "$ref": "#/$defs/text" },
+        "highlights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["milestone_refs", "claim_refs"],
+          "properties": {
+            "milestone_refs": { "type": "array", "items": { "$ref": "#/$defs/mil_id" } },
+            "claim_refs": { "type": "array", "items": { "$ref": "#/$defs/claim_ref" } }
+          }
+        }
+      }
+    },
+    "document_generation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document", "inputs", "selection", "chapters", "bindings",
+                   "coherence", "disclosures", "rendering", "identity"],
+      "properties": {
+        "document": { "$ref": "#/$defs/document" },
+        "inputs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/input" } },
+        "selection": { "$ref": "#/$defs/selection" },
+        "chapters": { "type": "array", "minItems": 17, "maxItems": 17, "items": { "$ref": "#/$defs/chapter" } },
+        "bindings": { "type": "array", "items": { "$ref": "#/$defs/binding" } },
+        "coherence": { "$ref": "#/$defs/coherence" },
+        "disclosures": { "$ref": "#/$defs/disclosures" },
+        "rendering": { "$ref": "#/$defs/rendering" },
+        "identity": { "$ref": "#/$defs/identity" }
+      }
+    },
+    "document": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "project_name", "project_slug", "version_label", "as_of",
+                   "language", "primary_reader", "startup_type", "development_stage"],
+      "properties": {
+        "title": { "$ref": "#/$defs/text" },
+        "project_name": { "$ref": "#/$defs/text" },
+        "project_slug": { "$ref": "#/$defs/text" },
+        "version_label": { "$ref": "#/$defs/text" },
+        "as_of": { "$ref": "#/$defs/iso_date" },
+        "language": { "const": "it" },
+        "primary_reader": { "$ref": "#/$defs/text" },
+        "startup_type": { "$ref": "#/$defs/text" },
+        "development_stage": { "$ref": "#/$defs/text" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "role", "stage", "sha256", "data_room_document_id", "data_room_match"],
+      "properties": {
+        "path": { "$ref": "#/$defs/text" },
+        "role": { "type": "string", "enum": ["stage_canonical", "stage_derived", "shared_register",
+                                             "project_profile", "data_room_manifest"] },
+        "stage": { "$ref": "#/$defs/nullable_text" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "data_room_document_id": { "type": ["string", "null"], "pattern": "^DR-(?:[0-9]{3}|[1-9][0-9]{3,})$" },
+        "data_room_match": { "type": "string", "enum": ["match", "not_indexed", "register_drift"] }
+      }
+    },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["milestone_refs", "claim_refs", "origin"],
+      "properties": {
+        "milestone_refs": { "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/mil_id" } },
+        "claim_refs": { "type": "array", "maxItems": 5, "items": { "$ref": "#/$defs/claim_ref" } },
+        "origin": { "type": "string", "enum": ["proposal", "default"] }
+      }
+    },
+    "chapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chapter_id", "ordinal", "title", "anchor", "source_stages", "status",
+                   "not_applicable_reason", "claim_refs", "sections"],
+      "properties": {
+        "chapter_id": { "type": "string", "pattern": "^cap-(?:0[1-9]|1[0-7])$" },
+        "ordinal": { "type": "integer", "minimum": 1, "maximum": 17 },
+        "title": { "$ref": "#/$defs/text" },
+        "anchor": { "type": "string", "pattern": "^cap-(?:0[1-9]|1[0-7])$" },
+        "source_stages": { "type": "array", "items": { "$ref": "#/$defs/text" } },
+        "status": { "type": "string", "enum": ["rendered", "not_applicable"] },
+        "not_applicable_reason": { "$ref": "#/$defs/nullable_text" },
+        "claim_refs": { "type": "array", "items": { "$ref": "#/$defs/claim_ref" } },
+        "sections": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/section" } }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section_id", "ordinal", "title", "anchor", "blocks"],
+      "properties": {
+        "section_id": { "type": "string", "pattern": "^cap-[0-9]{2}-[0-9]{2}$" },
+        "ordinal": { "type": "integer", "minimum": 1 },
+        "title": { "$ref": "#/$defs/text" },
+        "anchor": { "type": "string", "pattern": "^cap-[0-9]{2}-[0-9]{2}$" },
+        "blocks": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/block" } }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "json_path"],
+      "properties": {
+        "file": { "$ref": "#/$defs/text" },
+        "json_path": { "type": "string", "pattern": "^\\$" }
+      }
+    },
+    "table": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "rows"],
+      "properties": {
+        "columns": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "rows": { "type": "array", "items": { "type": "array", "items": { "type": "string" } } }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["block_id", "kind", "origin", "source", "template_id", "text", "items",
+                   "table", "binding_refs"],
+      "properties": {
+        "block_id": { "type": "string", "pattern": "^cap-[0-9]{2}-[0-9]{2}-b[0-9]{2,}$" },
+        "kind": { "type": "string", "enum": ["paragraph", "list", "table", "notice"] },
+        "origin": { "type": "string", "enum": ["canonical", "template"] },
+        "source": { "anyOf": [{ "$ref": "#/$defs/source" }, { "type": "null" }] },
+        "template_id": { "$ref": "#/$defs/nullable_text" },
+        "text": { "$ref": "#/$defs/nullable_text" },
+        "items": { "type": "array", "items": { "type": "string" } },
+        "table": { "anyOf": [{ "$ref": "#/$defs/table" }, { "type": "null" }] },
+        "binding_refs": { "type": "array", "items": { "$ref": "#/$defs/bnd_id" } }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding_id", "key", "source", "value", "unit", "currency", "qualifier", "rendered"],
+      "properties": {
+        "binding_id": { "$ref": "#/$defs/bnd_id" },
+        "key": { "$ref": "#/$defs/text" },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file", "json_path", "record_id"],
+          "properties": {
+            "file": { "$ref": "#/$defs/text" },
+            "json_path": { "type": "string", "pattern": "^\\$" },
+            "record_id": { "type": ["string", "null"], "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$" }
+          }
+        },
+        "value": { "$ref": "#/$defs/nullable_text" },
+        "unit": { "$ref": "#/$defs/nullable_text" },
+        "currency": { "$ref": "#/$defs/nullable_text" },
+        "qualifier": { "type": "string", "enum": ["none", "founder_assumption", "model_estimate",
+                                                  "missing_information", "unvalidated"] },
+        "rendered": { "$ref": "#/$defs/text" }
+      }
+    },
+    "coherence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks"],
+      "properties": {
+        "checks": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["check_id", "status", "affected_refs", "message"],
+            "properties": {
+              "check_id": { "type": "string", "pattern": "^XS-(?:0[1-9]|1[0-2])$" },
+              "status": { "type": "string", "enum": ["PASS", "WARNING", "NOT_APPLICABLE"] },
+              "affected_refs": { "type": "array", "items": { "type": "string" } },
+              "message": { "$ref": "#/$defs/text" }
+            }
+          }
+        }
+      }
+    },
+    "disclosures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["open_conditions", "unsupported_claims", "contested_claims", "data_room_conflicts",
+                   "data_room_gaps", "data_room_completeness", "financial_readiness",
+                   "funding_residual", "register_drift_since_data_room", "final_review"],
+      "properties": {
+        "open_conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["condition_id", "description", "severity", "due_before_stage"],
+            "properties": {
+              "condition_id": { "type": "string", "pattern": "^COND-(?:[0-9]{3}|[1-9][0-9]{3,})$" },
+              "description": { "type": "string" },
+              "severity": { "type": "string" },
+              "due_before_stage": { "type": "string" }
+            }
+          }
+        },
+        "unsupported_claims": { "type": "array", "items": { "$ref": "#/$defs/claim_ref" } },
+        "contested_claims": { "type": "array", "items": { "$ref": "#/$defs/claim_ref" } },
+        "data_room_conflicts": { "type": "array", "items": { "type": "string" } },
+        "data_room_gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "ref"],
+            "properties": { "kind": { "type": "string" }, "ref": { "type": "string" } }
+          }
+        },
+        "data_room_completeness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claims_total", "claims_supported", "coverage_percent"],
+          "properties": {
+            "claims_total": { "$ref": "#/$defs/nullable_text" },
+            "claims_supported": { "$ref": "#/$defs/nullable_text" },
+            "coverage_percent": { "$ref": "#/$defs/nullable_text" }
+          }
+        },
+        "financial_readiness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["result", "propagated_status", "investor_readiness_status",
+                       "scenario_coverage_level"],
+          "properties": {
+            "result": { "$ref": "#/$defs/nullable_text" },
+            "propagated_status": { "$ref": "#/$defs/nullable_text" },
+            "investor_readiness_status": { "$ref": "#/$defs/nullable_text" },
+            "scenario_coverage_level": { "$ref": "#/$defs/nullable_text" }
+          }
+        },
+        "funding_residual": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sufficiency", "unresolved_validation_items"],
+          "properties": {
+            "sufficiency": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["funded_horizon", "residual_gap", "residual_gap_disclosed", "basis"],
+              "properties": {
+                "funded_horizon": { "$ref": "#/$defs/nullable_text" },
+                "residual_gap": { "$ref": "#/$defs/nullable_text" },
+                "residual_gap_disclosed": { "type": "boolean" },
+                "basis": { "$ref": "#/$defs/nullable_text" }
+              }
+            },
+            "unresolved_validation_items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["severity", "code", "message"],
+                "properties": {
+                  "severity": { "type": "string" },
+                  "code": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "register_drift_since_data_room": { "type": "array", "items": { "type": "string" } },
+        "final_review": { "const": "not_performed" }
+      }
+    },
+    "rendering": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["format", "output_path", "max_heading_level", "markdown_sha256"],
+      "properties": {
+        "format": { "const": "gfm-markdown" },
+        "output_path": { "const": "output/business-plan.md" },
+        "max_heading_level": { "const": 3 },
+        "markdown_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "excluded_fields", "payload_sha256"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "excluded_fields": { "const": ["rendering"] },
+        "payload_sha256": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

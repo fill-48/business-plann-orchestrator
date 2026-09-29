@@ -1,0 +1,214 @@
+{
+  "description": "Tabella DICHIARATA degli stili e dei lessici dei due derivati obbligatori dello Stage 10 (capitolo Markdown e workbook). È un DATO, non una costante di codice: cambiare un token è quindi una modifica VISIBILE nel diff e non una modifica al renderer o all'exporter. Il file NON contiene alcun valore economico: porta colori ARGB, etichette testuali, titoli di sezione e di tabella, unità di misura DICHIARATE per path canonico e il LESSICO CHIUSO di promozione. Nessuna soglia, nessuna tolleranza e nessuna politica di calcolo vivono qui: tolleranze e decimali restano in `config/enforcement-config.json`.",
+  "introduced_in": "0.4.0",
+  "styles": {
+    "assumption_to_validate": {
+      "argb": "FFF4B183",
+      "pattern_fill": "solid",
+      "label": "ASSUNZIONE DA VALIDARE",
+      "normative": true,
+      "editable": true,
+      "formula_allowed": false,
+      "note": "il token ARANCIONE. È NORMATIVO, non indicativo: i test del workbook ne verificano il valore atteso, che deve quindi essere fissato qui. Copre gli stati `researched_assumption` e `inferred_assumption`."
+    },
+    "confirmed_input": {
+      "argb": "FFD9E1F2",
+      "pattern_fill": "solid",
+      "label": "INPUT CONFERMATO",
+      "normative": true,
+      "editable": true,
+      "formula_allowed": false
+    },
+    "calculated_locked": {
+      "argb": "FFF2F2F2",
+      "pattern_fill": "solid",
+      "label": "CALCOLATO",
+      "normative": true,
+      "editable": false,
+      "formula_allowed": true
+    },
+    "unresolved_blocking": {
+      "argb": "FFFF7C80",
+      "pattern_fill": "solid",
+      "label": "UNRESOLVED",
+      "normative": true,
+      "editable": false,
+      "formula_allowed": false
+    },
+    "derived_neutral": {
+      "argb": "FFE2EFDA",
+      "pattern_fill": "solid",
+      "label": "DERIVATO",
+      "normative": true,
+      "editable": false,
+      "formula_allowed": true
+    }
+  },
+  "assumption_styles": [
+    "assumption_to_validate",
+    "confirmed_input"
+  ],
+  "orange_style": "assumption_to_validate",
+  "placeholder_marker": "PLACEHOLDER",
+  "driver_status_style": {
+    "confirmed": "confirmed_input",
+    "inferred": "assumption_to_validate",
+    "placeholder": "assumption_to_validate",
+    "unresolved": "unresolved_blocking"
+  },
+  "driver_status_label": {
+    "confirmed": "INPUT CONFERMATO",
+    "inferred": "ASSUNZIONE DA VALIDARE",
+    "placeholder": "ASSUNZIONE DA VALIDARE — PLACEHOLDER",
+    "unresolved": "UNRESOLVED"
+  },
+  "legend_note": "Il colore NON è mai l'unico portatore di significato: ogni cella stilata porta, nella colonna adiacente e nella riga corrispondente dell'Assumption Register, il TESTO dello stato. La legenda è raggiunta dal named range `legend_styles`.",
+  "chapter": {
+    "sections": [
+      {"id": "scope", "number": 1, "title": "Perimetro del Financial Plan e approccio di modellazione"},
+      {"id": "assumptions", "number": 2, "title": "Assunzioni finanziarie principali"},
+      {"id": "revenue_model", "number": 3, "title": "Modello di ricavo"},
+      {"id": "cost_structure", "number": 4, "title": "Struttura dei costi"},
+      {"id": "headcount", "number": 5, "title": "Piano dell'organico e del costo del personale"},
+      {"id": "pnl", "number": 6, "title": "Conto economico previsionale"},
+      {"id": "cash_plan", "number": 7, "title": "Piano di cassa"},
+      {"id": "burn_runway", "number": 8, "title": "Burn e runway"},
+      {"id": "break_even", "number": 9, "title": "Analisi di break-even"},
+      {"id": "scenarios", "number": 10, "title": "Scenari Base, Downside e Upside"},
+      {"id": "milestones", "number": 11, "title": "Copertura finanziaria delle milestone"},
+      {"id": "funding_need", "number": 12, "title": "Fabbisogno finanziario e funding gap"},
+      {"id": "kpi", "number": 13, "title": "KPI finanziari"},
+      {"id": "caveats", "number": 14, "title": "Rischi, caveat e input non risolti"},
+      {"id": "conclusions", "number": 15, "title": "Conclusioni finanziarie"}
+    ],
+    "tables": [
+      {"id": "assumptions", "number": 1, "title": "Assunzioni principali", "section": "assumptions"},
+      {"id": "pnl", "number": 2, "title": "Conto economico annuale, per periodo e senza aggregazione", "section": "pnl"},
+      {"id": "cash_plan", "number": 3, "title": "Piano di cassa per periodo", "section": "cash_plan"},
+      {"id": "headcount_payroll", "number": 4, "title": "Organico e costo del personale", "section": "headcount"},
+      {"id": "cost_categories", "number": 5, "title": "Costi per categoria", "section": "cost_structure"},
+      {"id": "scenario_comparison", "number": 6, "title": "Confronto di scenario", "section": "scenarios"},
+      {"id": "burn_runway_buffer", "number": 7, "title": "Burn, runway e buffer di cassa", "section": "burn_runway"},
+      {"id": "break_even", "number": 8, "title": "Break-even", "section": "break_even"},
+      {"id": "milestone_coverage", "number": 9, "title": "Copertura delle milestone", "section": "milestones"},
+      {"id": "funding_need", "number": 10, "title": "Fabbisogno finanziario e funding gap", "section": "funding_need"},
+      {"id": "kpi", "number": 11, "title": "KPI finanziari", "section": "kpi"},
+      {"id": "unresolved_caveats", "number": 12, "title": "Input non risolti, riconciliazioni e caveat", "section": "caveats"}
+    ],
+    "trace_columns": ["Voce", "Valore", "Unità", "Scenario", "Periodo / aggregazione", "Path canonico"],
+    "aggregation_rule": "scalare canonico — nessuna aggregazione",
+    "no_rounding_note": "Nessun arrotondamento è applicato alla resa: l'arrotondamento è una POLITICA e appartiene al motore. Il capitolo mostra il valore canonico VERBATIM, e la colonna «Path canonico» ne consente la verifica puntuale."
+  },
+  "promotion_lexicon": {
+    "description": "LESSICO CHIUSO di promozione, applicato alla PROSA GENERATA del capitolo (non alle stringhe copiate VERBATIM dal canonico, che sono citazioni). Ogni voce dichiara la condizione canonica sotto cui il termine è ammesso: fuori da quella condizione il termine è un difetto, rilevato dai test del capitolo con attribuzione di sezione e termine. Il controllo fallisce ANCHE se ogni numero è corretto: misura la RAPPRESENTAZIONE, non l'esito.",
+    "scan_scope": "La scansione si applica alle sole righe di PROSA GENERATA: sono ESCLUSE le righe di tabella (che iniziano con `|` e portano valori e stringhe canoniche) e le CITAZIONI VERBATIM del canonico, delimitate dalle virgolette caporali `«` e `»`. La convenzione è DICHIARATA e verificabile: ciò che sta fra caporali è una citazione del canonico, non un'affermazione del capitolo.",
+    "verbatim_citation_delimiters": ["«", "»"],
+    "terms": [
+      {"term": "investor-ready", "forms": ["investor-ready", "investor ready"], "allowed_when": "investor_readiness_ready"},
+      {"term": "pronto per l'investitore", "forms": ["pronto per l'investitore", "pronta per l'investitore"], "allowed_when": "investor_readiness_ready"},
+      {"term": "bancabile", "forms": ["bancabile", "bancabili"], "allowed_when": "investor_readiness_ready"},
+      {"term": "presentabile", "forms": ["presentabile", "presentabili"], "allowed_when": "investor_readiness_ready"},
+      {"term": "confermato", "forms": ["confermato", "confermata", "confermati", "confermate"], "allowed_when": "all_drivers_confirmed"},
+      {"term": "validato", "forms": ["validato", "validata", "validati", "validate"], "allowed_when": "all_drivers_confirmed"},
+      {"term": "verificato", "forms": ["verificato", "verificata", "verificati", "verificate"], "allowed_when": "all_drivers_confirmed"},
+      {"term": "solido", "forms": ["solido", "solida", "solidi", "solide"], "allowed_when": "all_drivers_confirmed"},
+      {"term": "testato", "forms": ["testato", "testata", "testati", "testate"], "allowed_when": "all_scenarios_produced"},
+      {"term": "stressato", "forms": ["stressato", "stressata", "stressati", "stressate"], "allowed_when": "all_scenarios_produced"},
+      {"term": "non rilevante", "forms": ["non rilevante", "non rilevanti"], "allowed_when": "never"}
+    ],
+    "predicates": {
+      "investor_readiness_ready": "financial_plan.validation.investor_readiness.status == \"ready\"",
+      "all_drivers_confirmed": "ogni driver_entry.status == \"confirmed\"",
+      "all_scenarios_produced": "financial_plan.results.scenarios.coverage.level == \"full\"",
+      "never": "mai ammesso: un KPI NOT_APPLICABLE è «non calcolabile per assenza del driver X», mai «non rilevante»"
+    }
+  },
+  "taxonomy": {
+    "description": "Ripartizione DICHIARATA della tassonomia `$defs.cost_category` fra FONTI e USI. È un'enumerazione dichiarata, non un numero: serve al capitolo per separare la tabella del conto economico da quella dei costi per categoria.",
+    "source_categories": ["operating_revenue", "other_operating_income"],
+    "use_categories": ["operating_cost", "interest", "mandatory_financing_fee"]
+  },
+  "pnl_modules": ["revenue", "cogs", "gross_margin", "payroll", "opex", "pnl"],
+  "units": {
+    "description": "Unità DICHIARATE per path canonico. Non sono dedotte dal valore: dove il canonico porta esso stesso l'unità — `kpi.indicators[].unit`, `reconciliations[].tolerance_unit` — è QUELLA a valere, e questa tabella non la sovrascrive.",
+    "currency_source": "financial_plan.driver_registry.drivers[].currency (insieme VERIFICATO come singolo; se non unico la resa è NON DICHIARATA, mai dedotta)",
+    "by_module_series": {
+      "revenue": "EUR",
+      "cogs": "EUR",
+      "gross_margin": "EUR",
+      "headcount": "FTE",
+      "payroll": "EUR",
+      "opex": "EUR",
+      "pnl": "EUR",
+      "cash_flow": "EUR",
+      "funding_gap": "EUR"
+    },
+    "by_metric_prefix": {
+      "burn": "EUR",
+      "cash_in": "EUR",
+      "cash_out": "EUR",
+      "opening": "EUR",
+      "ending": "EUR",
+      "ebitda": "EUR",
+      "gross_margin": "EUR",
+      "funding_gap_to_zero": "EUR",
+      "funding_gap_to_buffer": "EUR",
+      "runway_to_zero": "count",
+      "runway_to_buffer": "count",
+      "first_period_below_zero": "period_index",
+      "first_period_below_buffer": "period_index"
+    },
+    "by_break_even_field": {
+      "break_even_revenue": "EUR",
+      "break_even_volume": "count",
+      "unit_margin": "EUR/count",
+      "fixed_costs_per_period": "EUR",
+      "first_break_even_period": "period_index"
+    },
+    "coverage": {
+      "ratio": "ratio",
+      "threshold": "ratio"
+    }
+  },
+  "workbook": {
+    "sheets": [
+      {"number": 1, "name": "README", "canonical_source": "financial_plan.calculation_metadata + schema_version"},
+      {"number": 2, "name": "Assumptions", "canonical_source": "financial_plan.driver_registry.drivers[] + registri governati (assunzioni, evidenze, fonti)"},
+      {"number": 3, "name": "Calendar", "canonical_source": "financial_plan.results.calendar"},
+      {"number": 4, "name": "Revenue", "canonical_source": "financial_plan.results.modules.revenue"},
+      {"number": 5, "name": "COGS", "canonical_source": "financial_plan.results.modules.cogs + .gross_margin"},
+      {"number": 6, "name": "Headcount", "canonical_source": "financial_plan.results.modules.headcount"},
+      {"number": 7, "name": "Payroll", "canonical_source": "financial_plan.results.modules.payroll"},
+      {"number": 8, "name": "Opex", "canonical_source": "financial_plan.results.modules.opex"},
+      {"number": 9, "name": "P&L", "canonical_source": "financial_plan.results.modules.pnl"},
+      {"number": 10, "name": "Cash Flow", "canonical_source": "financial_plan.results.modules.cash_flow"},
+      {"number": 11, "name": "Scenarios", "canonical_source": "financial_plan.results.scenarios"},
+      {"number": 12, "name": "Runway & Funding Gap", "canonical_source": "financial_plan.results.modules.runway + .cash_buffer + .funding_gap"},
+      {"number": 13, "name": "Break-even", "canonical_source": "financial_plan.results.modules.break_even"},
+      {"number": 14, "name": "Milestones", "canonical_source": "financial_plan.results.modules.milestone_coverage"},
+      {"number": 15, "name": "KPI", "canonical_source": "financial_plan.results.modules.kpi.indicators"},
+      {"number": 16, "name": "Reconciliation", "canonical_source": "financial_plan.reconciliations"},
+      {"number": 17, "name": "Dashboard", "canonical_source": "metriche di testata + validation"},
+      {"number": 18, "name": "Assumption Register", "canonical_source": "financial_plan.driver_registry.drivers[] + registri governati (assunzioni, evidenze, fonti)"}
+    ],
+    "allowed_formula_functions": ["SUM", "ABS", "IF", "AND", "OR", "N", "COUNT", "COUNTA", "MIN", "MAX", "TEXT", "ISNUMBER"],
+    "volatile_named_cell": "meta_generated_at",
+    "assumption_register_fields": [
+      "assumption_id", "driver_role", "description", "value", "unit",
+      "period_or_effective_date", "scenario_applicability", "source_status_and_provenance",
+      "rationale", "owner", "validation_status", "workbook_location",
+      "canonical_ref", "materiality", "validation_action", "last_updated"
+    ]
+  },
+  "headline_metrics": [
+    {"id": "revenue", "label": "Ricavi"},
+    {"id": "gross_margin", "label": "Margine lordo"},
+    {"id": "ebitda", "label": "EBITDA o equivalente dichiarato dal profilo"},
+    {"id": "ending_cash", "label": "Cassa finale"},
+    {"id": "burn", "label": "Burn"},
+    {"id": "runway", "label": "Runway"},
+    {"id": "break_even", "label": "Break-even"},
+    {"id": "funding_gap", "label": "Funding gap"},
+    {"id": "milestone_coverage", "label": "Copertura milestone"}
+  ]
+}

@@ -1,0 +1,585 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://business-plan-orchestrator/schemas/funding-request.schema.json",
+  "title": "Funding Request",
+  "description": "Documento CANONICO dello Stage 11 (11_funding-request). E' una PROIEZIONE sul canonico ACCETTATO dello Stage 10, non un secondo motore finanziario: legge 10_financial-plan/structured-output.json come UNICA sorgente numerica, non ricalcola nulla in silenzio e non introduce alcuna cifra manuale non supportata. Lo schema e' CHIUSO a OGNI livello (additionalProperties: false): i sette termini finanziari che lo Stage 11 non possiede - funding_ask, instrument, valuation, round_size, ownership, dilution, terms - sono percio' strutturalmente irricevibili, e il validator li respinge anche con un controllo ESPLICITO, perche' affidarsi alla sola chiusura dello schema renderebbe il requisito un effetto della sua forma invece che un contratto verificato.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "funding_request"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Versione DICHIARATA dello schema della funding request."
+    },
+    "funding_request": { "$ref": "#/$defs/funding_request" }
+  },
+  "$defs": {
+    "amount": {
+      "type": ["number", "string"],
+      "description": "Grandezza numerica. La forma STRINGA e' ammessa per preservare la precisione Decimal degli accumuli, esattamente come $defs.amount del piano finanziario accettato: assumere float romperebbe la precisione."
+    },
+    "iso_date": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "canonical_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Path canonico DICHIARATO dentro il documento dello Stage 10, in forma puntata con indici. NOMINA la sorgente del valore: un valore senza path non e' proiettato, e' inventato."
+    },
+    "evd_ref": {
+      "type": "string",
+      "pattern": "^EVD-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Forma canonica degli id, TIPIZZATA e riusata per $ref. Un alias con padding divergente (EVD-0021) NON e' un id valido: e' RICONOSCIUTO e RESPINTO con codice attribuito, mai normalizzato, troncato o riscritto."
+    },
+    "src_ref": {
+      "type": "string",
+      "pattern": "^SRC-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Forma canonica degli id, TIPIZZATA e riusata per $ref, con la stessa politica fail-closed sugli alias di evd_ref."
+    },
+    "ass_ref": {
+      "type": "string",
+      "pattern": "^ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "mil_ref": {
+      "type": "string",
+      "pattern": "^MIL-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "check_status": {
+      "type": "string",
+      "enum": ["PASS", "UNRESOLVED_INPUT", "WARNING", "FAIL", "NOT_APPLICABLE"],
+      "description": "Dominio CHIUSO riusato da $defs.canonical_check_status del piano finanziario accettato: nessun vocabolario parallelo e' coniato qui."
+    },
+    "funding_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source", "reader_context", "horizon", "capital_requirement",
+        "requested_capital", "use_of_proceeds", "runway", "sufficiency",
+        "milestone_financing", "milestone_financing_summary", "tranches",
+        "investment_requirement", "scenario_sensitivity",
+        "dependencies_and_assumptions", "unresolved_validation_items",
+        "governance", "provenance", "narrative", "evidence_index"
+      ],
+      "properties": {
+        "source": { "$ref": "#/$defs/source" },
+        "reader_context": { "$ref": "#/$defs/reader_context" },
+        "horizon": { "$ref": "#/$defs/horizon" },
+        "capital_requirement": { "$ref": "#/$defs/capital_requirement" },
+        "requested_capital": { "$ref": "#/$defs/requested_capital" },
+        "use_of_proceeds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/use_of_proceeds_entry" }
+        },
+        "runway": { "$ref": "#/$defs/runway" },
+        "sufficiency": { "$ref": "#/$defs/sufficiency" },
+        "milestone_financing": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/milestone_financing_entry" }
+        },
+        "milestone_financing_summary": {
+          "$ref": "#/$defs/milestone_financing_summary"
+        },
+        "tranches": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tranche_entry" }
+        },
+        "investment_requirement": {
+          "$ref": "#/$defs/investment_requirement"
+        },
+        "scenario_sensitivity": { "$ref": "#/$defs/scenario_sensitivity" },
+        "dependencies_and_assumptions": {
+          "$ref": "#/$defs/dependencies_and_assumptions"
+        },
+        "unresolved_validation_items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/unresolved_item" }
+        },
+        "governance": { "$ref": "#/$defs/governance" },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance_entry" }
+        },
+        "narrative": { "$ref": "#/$defs/narrative" },
+        "evidence_index": { "$ref": "#/$defs/evidence_index" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "canonical_path", "canonical_source_checksum",
+                   "canonical_schema_version"],
+      "properties": {
+        "stage": { "type": "string", "const": "10_financial-plan" },
+        "canonical_path": { "type": "string", "minLength": 1 },
+        "canonical_source_checksum": { "$ref": "#/$defs/sha256" },
+        "canonical_schema_version": { "type": "string", "minLength": 1 }
+      },
+      "description": "L'UNICA sorgente numerica, NOMINATA. canonical_source_checksum e' l'impronta gia' prodotta dallo Stage 10 (calculation_metadata.output_checksums.base) e non e' ricalcolata qui."
+    },
+    "reader_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile_ref", "funding_type", "primary_reader",
+                   "development_stage"],
+      "properties": {
+        "profile_ref": { "type": ["string", "null"] },
+        "funding_type": { "type": ["string", "null"] },
+        "primary_reader": { "type": ["string", "null"] },
+        "development_stage": { "type": ["string", "null"] }
+      },
+      "description": "I tre campi si LEGGONO da shared/startup-profile.json e non si inferiscono MAI. Profilo assente: i tre valgono null, profile_ref vale null e decision_needed[] porta la voce che lo DICHIARA."
+    },
+    "horizon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor_date", "frequency", "horizon_periods",
+                   "source_path"],
+      "properties": {
+        "anchor_date": { "$ref": "#/$defs/iso_date" },
+        "frequency": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "annual"]
+        },
+        "horizon_periods": { "type": "integer", "minimum": 1 },
+        "source_path": { "$ref": "#/$defs/canonical_path" }
+      },
+      "description": "Coincide con results.calendar, campo per campo."
+    },
+    "capital_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["modeled_need_ref", "modeled_need_amount",
+                   "buffer_component", "contingency_component",
+                   "timing_granularity", "policy_ref", "reconciliation"],
+      "properties": {
+        "modeled_need_ref": {
+          "$ref": "#/$defs/canonical_path",
+          "description": "NOMINA per esteso il path canonico EFFETTIVAMENTE usato: PRIMARIA funding_gap.metrics.funding_gap_to_buffer, FALLBACK funding_gap.metrics.funding_gap_to_zero SOLO E SOLTANTO su NOT_APPLICABLE."
+        },
+        "modeled_need_amount": { "$ref": "#/$defs/amount" },
+        "buffer_component": { "$ref": "#/$defs/buffer_component" },
+        "contingency_component": { "$ref": "#/$defs/contingency_component" },
+        "timing_granularity": {
+          "type": "string",
+          "enum": ["monthly", "quarterly", "annual"]
+        },
+        "policy_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "NOMINA i riferimenti che fissano la politica di capitalizzazione. Un importo senza politica dichiarata e' irricevibile."
+        },
+        "reconciliation": { "$ref": "#/$defs/reconciliation" }
+      }
+    },
+    "buffer_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["included_in_base", "NOT_APPLICABLE", "absent"],
+          "description": "TRE stati chiusi e nessun quarto. Il buffer e' GIA' INCLUSO nella base quando questa e' funding_gap_to_buffer: nessun componente addizionale e' sommato, e un buffer numerico POSITIVO sommato alla base e' un FAIL, non un arrotondamento."
+        },
+        "amount": { "$ref": "#/$defs/amount" },
+        "source_path": { "$ref": "#/$defs/canonical_path" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "contingency_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["absent", "declared", "NOT_APPLICABLE"],
+          "description": "Nessuna contingency e' applicata per default (stato `absent`): lo stato e' DICHIARATO, mai stimato. Una contingency entra nella richiesta solo se dichiarata ESPLICITAMENTE."
+        },
+        "amount": { "$ref": "#/$defs/amount" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expected", "actual", "residual", "tolerance", "status",
+                   "addends"],
+      "properties": {
+        "expected": { "$ref": "#/$defs/amount" },
+        "actual": { "$ref": "#/$defs/amount" },
+        "residual": { "$ref": "#/$defs/amount" },
+        "tolerance": { "type": "string", "minLength": 1 },
+        "status": { "$ref": "#/$defs/check_status" },
+        "addends": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "amount", "role"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "amount": { "$ref": "#/$defs/amount" },
+              "role": {
+                "type": "string",
+                "enum": ["base", "exposure", "addend"],
+                "description": "Un componente `exposure` e' ESPOSTO per leggibilita' e NON entra nella somma: e' il caso del buffer gia' incluso nella base."
+              }
+            }
+          }
+        }
+      }
+    },
+    "requested_capital": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency", "rounding_applied", "policy_ref"],
+      "properties": {
+        "amount": { "$ref": "#/$defs/amount" },
+        "currency": { "type": "string", "minLength": 1 },
+        "rounding_applied": {
+          "type": "string",
+          "enum": ["none"],
+          "description": "Nessun arrotondamento e' applicato al capitale richiesto: l'enum e' percio' chiuso a `none`."
+        },
+        "policy_ref": { "type": "string", "minLength": 1 }
+      }
+    },
+    "use_of_proceeds_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category_id", "label", "amount", "percentage",
+                   "driver_refs", "candidate_ref"],
+      "properties": {
+        "category_id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "amount": { "$ref": "#/$defs/amount" },
+        "percentage": { "$ref": "#/$defs/amount" },
+        "driver_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^DRV-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+          }
+        },
+        "candidate_ref": { "type": "string", "minLength": 1 }
+      },
+      "description": "amount E percentage insieme, ridondanza VOLUTA e verificata su ENTRAMBI i lati. candidate_ref risale a un category_id di funding_gap.use_of_proceeds_candidates: e' il SOLO punto in cui l'allocazione e' lecita, e sotto contratto."
+    },
+    "runway": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["before_financing", "after_financing", "measure",
+                   "source_path"],
+      "properties": {
+        "before_financing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["runway_to_zero", "runway_to_buffer"],
+          "properties": {
+            "runway_to_zero": { "$ref": "#/$defs/amount" },
+            "runway_to_buffer": { "$ref": "#/$defs/amount" }
+          },
+          "description": "DUE grandezze DISTINTE per contratto di schema: collassarle e' un difetto, non una semplificazione."
+        },
+        "after_financing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["periods", "method", "source_path", "tolerance"],
+          "properties": {
+            "periods": { "type": "integer", "minimum": 0 },
+            "method": { "type": "string", "minLength": 1 },
+            "source_path": { "$ref": "#/$defs/canonical_path" },
+            "tolerance": { "type": "string", "const": "0" }
+          }
+        },
+        "measure": {
+          "type": "string",
+          "enum": ["to_zero", "to_buffer"],
+          "description": "Coerente con la base del fabbisogno: to_buffer con la primaria (funding_gap_to_buffer), to_zero col fallback (funding_gap_to_zero)."
+        },
+        "source_path": { "$ref": "#/$defs/canonical_path" }
+      }
+    },
+    "sufficiency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["funded_horizon", "residual_gap", "residual_gap_disclosed",
+                   "basis"],
+      "properties": {
+        "funded_horizon": { "type": "integer", "minimum": 0 },
+        "residual_gap": { "$ref": "#/$defs/amount" },
+        "residual_gap_disclosed": {
+          "type": "boolean",
+          "const": true,
+          "description": "Booleano OBBLIGATORIO che puo' valere SOLO true: emettere il documento nascondendo un gap residuo e' STRUTTURALMENTE impossibile."
+        },
+        "basis": { "type": "string", "minLength": 1 }
+      }
+    },
+    "milestone_financing_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["milestone_ref", "target_date", "cost_ref", "amount",
+                   "coverage_status", "financed_by", "out_of_horizon"],
+      "properties": {
+        "milestone_ref": { "$ref": "#/$defs/mil_ref" },
+        "target_date": {
+          "anyOf": [
+            { "$ref": "#/$defs/iso_date" },
+            { "type": "null" }
+          ],
+          "description": "PROIEZIONE DICHIARATA da milestone_coverage.milestones[].period_index e results.calendar. Una milestone in out_of_horizon_milestones[] NON riceve una target_date plausibile: vale null."
+        },
+        "cost_ref": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^DRV-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+          }
+        },
+        "amount": { "anyOf": [{ "$ref": "#/$defs/amount" }, { "type": "null" }] },
+        "coverage_status": {
+          "type": "string",
+          "enum": ["funded", "at_risk", "unfunded"]
+        },
+        "financed_by": {
+          "type": "string",
+          "enum": ["requested_capital", "not_financed", "NOT_SUPPORTED"]
+        },
+        "out_of_horizon": { "type": "boolean" }
+      }
+    },
+    "milestone_financing_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unmapped_residual", "out_of_horizon_count", "source_path"],
+      "properties": {
+        "unmapped_residual": { "$ref": "#/$defs/amount" },
+        "out_of_horizon_count": { "type": "integer", "minimum": 0 },
+        "source_path": { "$ref": "#/$defs/canonical_path" }
+      },
+      "description": "Il residuo non mappato e' ESPOSTO, mai assorbito."
+    },
+    "tranche_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tranche_id", "support", "reason"],
+      "properties": {
+        "tranche_id": { "type": "string", "minLength": 1 },
+        "support": {
+          "type": "string",
+          "enum": ["supported", "not_supported"],
+          "description": "Resta not_supported finche' non esiste un portatore canonico a monte: uno schedule di finanziamento NON si inventa."
+        },
+        "reason": { "type": "string", "minLength": 1 },
+        "amount": { "$ref": "#/$defs/amount" },
+        "target_date": { "$ref": "#/$defs/iso_date" },
+        "source_path": { "$ref": "#/$defs/canonical_path" }
+      }
+    },
+    "investment_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "modules"],
+      "properties": {
+        "status": { "type": "string", "const": "NOT_SUPPORTED" },
+        "reason": { "type": "string", "minLength": 1 },
+        "modules": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "description": "capex, depreciation, working_capital, tax e financing NON sono moduli del piano finanziario attuale: un requisito di investimento e' DICHIARATO NOT_SUPPORTED, mai stimato."
+    },
+    "scenario_sensitivity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "downside", "upside", "coverage_level"],
+      "properties": {
+        "base": { "$ref": "#/$defs/scenario_entry" },
+        "downside": { "$ref": "#/$defs/scenario_entry" },
+        "upside": { "$ref": "#/$defs/scenario_entry" },
+        "coverage_level": {
+          "type": "string",
+          "enum": ["full", "partial", "none"]
+        }
+      }
+    },
+    "scenario_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenario", "status"],
+      "properties": {
+        "scenario": {
+          "type": "string",
+          "enum": ["base", "downside", "upside"],
+          "description": "Gli id coincidono con l'enum canonico del motore, MINUSCOLI."
+        },
+        "status": { "$ref": "#/$defs/check_status" },
+        "not_applicable_reason": { "type": "string", "minLength": 1 },
+        "requested_capital_delta": {
+          "anyOf": [{ "$ref": "#/$defs/amount" }, { "type": "null" }]
+        },
+        "source_path": { "$ref": "#/$defs/canonical_path" }
+      }
+    },
+    "dependencies_and_assumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assumption_refs", "unvalidated_count", "decision_needed"],
+      "properties": {
+        "assumption_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/ass_ref" }
+        },
+        "unvalidated_count": { "type": "integer", "minimum": 0 },
+        "decision_needed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "question", "blocking"],
+            "properties": {
+              "code": { "type": "string", "minLength": 1 },
+              "question": { "type": "string", "minLength": 1 },
+              "blocking": { "type": "boolean" }
+            }
+          },
+          "description": "Un termine ignoto assume lo stato DICHIARATO decision_needed, MAI un valore plausibile."
+        }
+      }
+    },
+    "unresolved_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "code", "message"],
+      "properties": {
+        "severity": { "type": "string", "enum": ["ERROR", "WARNING"] },
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "affected_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "description": "Copia FEDELE da validation.errors/warnings: il conteggio a valle e' IDENTICO a quello a monte, e un filtro che scartasse i WARNING e' una soppressione."
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_validation_result", "source_propagated_status",
+                   "source_investor_readiness", "propagated_state"],
+      "properties": {
+        "source_validation_result": {
+          "type": "string",
+          "enum": ["PASS", "WARNING", "FAIL"]
+        },
+        "source_propagated_status": {
+          "type": "string",
+          "enum": ["unresolved", "placeholder", "inferred", "confirmed"]
+        },
+        "source_investor_readiness": {
+          "type": "string",
+          "enum": ["ready", "not_ready"]
+        },
+        "propagated_state": {
+          "type": "string",
+          "enum": ["approved", "approved_with_conditions", "not_approvable"],
+          "description": "Il documento PROPAGA - non lava - lo stato del canonico dello Stage 10: una funding request che uscisse PASS da un piano approved_with_conditions sarebbe una richiesta NON SOSTENUTA dall'evidenza."
+        }
+      }
+    },
+    "provenance_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "canonical_path", "scenario", "period", "unit",
+                   "currency", "canonical_source_checksum"],
+      "properties": {
+        "field": { "type": "string", "minLength": 1 },
+        "canonical_path": { "$ref": "#/$defs/canonical_path" },
+        "scenario": { "type": ["string", "null"] },
+        "period": { "type": ["integer", "null"], "minimum": 0 },
+        "unit": { "type": "string", "minLength": 1 },
+        "currency": { "type": ["string", "null"] },
+        "canonical_source_checksum": { "$ref": "#/$defs/sha256" },
+        "derivation": {
+          "type": "string",
+          "enum": ["projection", "reconciliation", "count"],
+          "description": "Presente SOLO dove il valore non e' una copia diretta di un path canonico ma una derivazione DICHIARATA e nominata: la proiezione di una target_date da period_index e calendar, un residuo di riconciliazione, un conteggio."
+        },
+        "derivation_paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/canonical_path" }
+        }
+      }
+    },
+    "narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sections", "numeric_refs"],
+      "properties": {
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["section_id", "title", "body"],
+            "properties": {
+              "section_id": { "type": "string", "minLength": 1 },
+              "title": { "type": "string", "minLength": 1 },
+              "body": { "type": "string" }
+            }
+          }
+        },
+        "numeric_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["literal", "field"],
+            "properties": {
+              "literal": { "type": "string", "minLength": 1 },
+              "field": { "type": "string", "minLength": 1 }
+            }
+          },
+          "description": "La narrativa NON calcola: ogni numero citato e' qui e risolve in provenance[]."
+        }
+      }
+    },
+    "evidence_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_refs", "source_refs", "availability"],
+      "properties": {
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/evd_ref" }
+        },
+        "source_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/src_ref" }
+        },
+        "availability": {
+          "type": "string",
+          "enum": ["available", "missing"],
+          "description": "Dove l'evidenza non esiste lo stato e' DICHIARATO `missing`, non un identificatore plausibile."
+        }
+      }
+    }
+  }
+}

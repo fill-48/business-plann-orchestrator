@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Team and Governance (Stage 8)",
+  "description": "Structured output dello Stage 8 08_team-and-governance. Le definizioni ROLE-* vivono solo qui. covers_processes[] è vincolato dallo schema alla sola FORMA di un id OPS-*: la risoluzione cross-file è di validate_referential_integrity, che la restringe alle definizioni con entity_type core_process — un riferimento verso una definizione OPS-* di tipo dependency o ip_asset è respinto con covers_non_process, e una definizione priva di entity_type valido con untyped_definition. Lo schema non può imporre quel vincolo perché il tipo vive in un altro file.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["team_governance"],
+  "$defs": {
+    "role_id": {
+      "type": "string",
+      "pattern": "^ROLE-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Id ROLE-* in forma canonica."
+    },
+    "ops_ref": {
+      "type": "string",
+      "pattern": "^OPS-(?:[0-9]{3}|[1-9][0-9]{3,})$"
+    },
+    "driver_ref": {
+      "type": "string",
+      "pattern": "^(?:P-)?ASS-(?:[0-9]{3}|[1-9][0-9]{3,})$",
+      "description": "Riferimento a un driver di assunzione, canonico (ASS-*) oppure proposto nel candidate (P-ASS-*). Stessa semantica di ANY_ASS_RE in validators/_framework.py: FTE e driver di costo headcount nascono come P-ASS-* nella transazione di Stage 8 e diventano ASS-* solo quando il transaction manager applica il candidate, quindi lo schema deve ammettere entrambe le forme. Le forme non canoniche (padding divergente come ASS-0040, prefissi come PASS-201, letterali) restano respinte."
+    },
+    "risk_ref": {
+      "type": "string",
+      "pattern": "^RISK-[0-9]{3,}$"
+    }
+  },
+  "properties": {
+    "team_governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles",
+        "capability_gaps",
+        "hiring_plan",
+        "decision_rights",
+        "governance",
+        "risk_refs"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "responsibilities", "covers_processes", "fte_ref"],
+            "oneOf": [
+              {
+                "required": ["person"],
+                "not": { "required": ["open_position"] }
+              },
+              {
+                "required": ["open_position"],
+                "not": { "required": ["person"] }
+              }
+            ],
+            "properties": {
+              "id": { "$ref": "#/$defs/role_id" },
+              "person": { "type": "string", "minLength": 1 },
+              "open_position": { "type": "string", "minLength": 1 },
+              "responsibilities": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              },
+              "covers_processes": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/ops_ref" },
+                "description": "Processi core coperti dal ruolo. Risolvibile solo verso definizioni OPS-* con entity_type core_process (verificato da validate_referential_integrity)."
+              },
+              "fte_ref": {
+                "$ref": "#/$defs/driver_ref",
+                "description": "FTE come driver ASS-*/P-ASS-*, mai una proiezione finanziaria."
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "capability_gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["gap", "addressed_by"],
+            "properties": {
+              "gap": { "type": "string", "minLength": 1 },
+              "addressed_by": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Hiring, advisor o COND-* esistente: un gap dichiarato non resta senza piano."
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "hiring_plan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["role_ref", "period", "cost_driver_ref"],
+            "properties": {
+              "role_ref": { "$ref": "#/$defs/role_id" },
+              "period": { "type": "string", "minLength": 1 },
+              "cost_driver_ref": { "$ref": "#/$defs/driver_ref" },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "decision_rights": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["area", "owner_ref"],
+            "properties": {
+              "area": { "type": "string", "minLength": 1 },
+              "owner_ref": {
+                "$ref": "#/$defs/role_id",
+                "description": "Un solo owner per area: la forma lista è respinta dallo schema, l'ambiguità semantica da decision_right_ambiguous."
+              },
+              "consulted_refs": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/role_id" }
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "governance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["structure", "equity_split"],
+          "properties": {
+            "structure": { "type": "string", "minLength": 1 },
+            "equity_split": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["holder", "share"],
+                "properties": {
+                  "holder": { "type": "string", "minLength": 1 },
+                  "share": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Ratio in [0,1]; la somma <= 1 è verificata con Decimal da validate_team_and_governance, non dallo schema."
+                  }
+                }
+              }
+            },
+            "vesting": { "type": "string" },
+            "incentives": { "type": "string" }
+          }
+        },
+        "advisors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "area"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "area": { "type": "string", "minLength": 1 },
+              "notes": { "type": "string" }
+            }
+          }
+        },
+        "risk_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/risk_ref" }
+        }
+      }
+    }
+  }
+}

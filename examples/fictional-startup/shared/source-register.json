@@ -1,0 +1,14 @@
+[
+  {
+    "id": "SRC-001",
+    "title": "Note interne interviste founder — 4 titolari di catena (retail/ristorazione)",
+    "publisher": "TurniDemo (interno)",
+    "url_or_path": "00_idea-discovery/founder-answers.md",
+    "publication_date": "2026-07-01",
+    "access_date": "2026-07-10",
+    "source_type": "interview",
+    "quality_rating": "medium",
+    "used_for": ["EVD-001", "EVD-002", "EVD-003"],
+    "notes": "Campione qualitativo di 4 interlocutori, non ancora statisticamente rappresentativo."
+  }
+]

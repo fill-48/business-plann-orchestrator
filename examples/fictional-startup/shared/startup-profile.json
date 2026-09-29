@@ -1,0 +1,11 @@
+{
+  "startup_type": "saas",
+  "development_stage": "pre_seed",
+  "primary_reader": "business_angel",
+  "funding_type": "equity",
+  "time_horizon": "24_months",
+  "secondary_readers": [],
+  "sector_notes": "Workforce scheduling SaaS per piccole catene retail e ristorazione (5-50 punti vendita) in Italia.",
+  "dominant_metrics": ["MRR", "ARR", "churn", "NRR", "CAC", "LTV", "payback"],
+  "classification_confidence": "medium"
+}

@@ -142,7 +142,7 @@ def check_docs(root, failures):
         s.check((root / "docs" / f"{name}.md").is_file(), f"docs/{name}.md missing",
                 failures)
     for name in ("README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md",
-                 "CODE_OF_CONDUCT.md", "CHANGELOG.md", "requirements.txt",
+                 "CHANGELOG.md", "requirements.txt",
                  "install.sh", "install.ps1", ".gitignore", ".gitattributes"):
         s.check((root / name).is_file(), f"{name} missing", failures)
     license_text = (root / "LICENSE").read_text(encoding="utf-8")

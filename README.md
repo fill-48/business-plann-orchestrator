@@ -182,7 +182,7 @@ esegue su Linux e Windows.
 - [Troubleshooting](docs/troubleshooting.md)
 - [Privacy e trattamento dei dati](docs/privacy-and-data-handling.md)
 - [Contribuire](CONTRIBUTING.md) · [Sicurezza](SECURITY.md) ·
-  [Codice di condotta](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md)
+  [Changelog](CHANGELOG.md)
 
 ## Licenza
 

@@ -22,8 +22,8 @@ python -c "import jsonschema; print('jsonschema ok')"
 ## Installazione
 
 ```bash
-git clone https://github.com/fill-48/business-plann-orchestrator.git
-cd business-plann-orchestrator
+git clone https://github.com/fill-48/business-plan-orchestrator.git
+cd business-plan-orchestrator
 python -m pip install -r requirements.txt
 ```
 

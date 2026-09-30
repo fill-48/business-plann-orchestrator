@@ -125,4 +125,4 @@ come tale.
   mai sovrascritto senza conferma esplicita dell'utente in un turno
   successivo (`INCOERENZA RILEVATA`).
 
-[0.7.1]: https://github.com/fill-48/business-plann-orchestrator/releases/tag/v0.7.1
+[0.7.1]: https://github.com/fill-48/business-plan-orchestrator/releases/tag/v0.7.1

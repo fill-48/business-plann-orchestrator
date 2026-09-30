@@ -13,8 +13,8 @@ Prerequisiti:
 - Claude Code, per provare la skill in una sessione reale.
 
 ```bash
-git clone https://github.com/fill-48/business-plann-orchestrator.git
-cd business-plann-orchestrator
+git clone https://github.com/fill-48/business-plan-orchestrator.git
+cd business-plan-orchestrator
 python -m pip install -r requirements.txt
 bash tests/run-tests.sh            # oppure: pwsh -File tests/run-tests.ps1
 ```
